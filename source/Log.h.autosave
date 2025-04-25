@@ -1,0 +1,115 @@
+#ifndef LOG_H
+#define LOG_H
+
+#include <string>
+
+/////////////////// DEBUG MACROS ///////////////////
+#define I(x) Log::info    (__PRETTY_FUNCTION__, x);
+#define W(x) Log::warning (__PRETTY_FUNCTION__, x);
+#define E(x) Log::error   (__PRETTY_FUNCTION__, x);
+#define D(x) Log::debug   (__PRETTY_FUNCTION__, x);
+////////////////////////////////////////////////////
+
+
+/// DEFAULT DATA
+///    - can be changed using setters in Log class
+#define LOG_FILE "LogHistory.log"
+
+/// size of file above what file will be trimmed to "trimLogFileSize" size
+#define MAX_LOG_FILE_SIZE 209'715'200
+
+/// size to what file will be trimmed, if crosses "maxLogFileSize" size
+#define TRIM_LOG_FILE_SIZE 10'485'760
+
+/// estimated function name length what will be reserved while creating log
+#define EST_FUNCTION_LENGTH 70
+
+/// characters that fills area before function name to fit estimated function name length
+#define SHORTER_FUNCTION_FILL_CHARACTER ' '
+
+/// creates spaces between space: "x ........ y" instead of "x........y"
+#define SPACE_AFTER_FUNCTION_NAME_ENABLED true
+
+/// space between function name and content
+#define SPACE_AFTER_FUNCTION_NAME_SIZE 10
+
+/// characters that fills space between function name and content
+#define SPACE_AFTER_FUNCTION_NAME_CHARACTER ' '
+
+
+class Log
+{
+    Log();
+    ~Log();
+    
+public:
+    static Log *getInstance();
+    
+    ///
+    /// \brief setLogFile - changes output log file to the given one
+    /// \param filePath - relative path to file
+    ///
+    void setLogFile(const std::string &filePath);
+    
+    ///
+    /// \brief setMaxLogFileSize - size of file above what file
+    ///        will be trimmed to "trimLogFileSize" size
+    /// \param fileSize - file size in bytes
+    ///
+    void setMaxLogFileSize(size_t fileSize);
+    
+    ///
+    /// \brief setTrimLogFileSize - sets size to what file will be trimmed,
+    ///        if crosses "maxLogFileSize" size
+    /// \param fileSize - file size in bytes
+    ///
+    void setTrimLogFileSize(size_t fileSize);
+    
+    ///
+    /// \brief setEstimatedFunctionLength - sets estimated function length
+    /// \param length - length of function name
+    ///
+    void setEstimatedFunctionLength(int length);
+    
+    ///
+    /// \brief setShorterFunctionFillCharacter - sets character that will be used
+    ///        to fill space, to match extimated function length
+    /// \param fillCharacter - character that will be used to fill space
+    ///
+    void setShorterFunctionFillCharacter(char fillCharacter);
+    
+    ///
+    /// \brief setSpaceAfterFunctionNameEnable - change if space after 
+    ///        function name is enabled
+    /// \param enable - true - enabled / false - disabled
+    ///
+    void setSpaceAfterFunctionNameEnable(bool enable);
+    
+    ///
+    /// \brief setSpaceAfterFunctionNameSize - sets size of space after
+    ///        function name
+    /// \param length
+    ///
+    void setSpaceAfterFunctionNameSize(int length);
+    
+    ///
+    /// \brief setSpaceAfterFunctionNameCharacter - sets character that 
+    ///        will be used to fill the gap after function name
+    /// \param gapCharacter
+    ///
+    void setSpaceAfterFunctionNameCharacter(char gapCharacter);
+    
+    
+private:
+    std::string m_logFileName;
+    size_t m_maxLogFileSize;
+    size_t m_logTrimFileSize;
+    
+    int m_estFunctionSize;
+    char m_shorterFunctionFillCharacter;
+    bool m_spaceAfterFunctionNameEnabled;
+    int m_spaceAfterFunctionN
+    
+};
+
+#endif // LOG_H
