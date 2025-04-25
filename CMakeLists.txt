@@ -11,18 +11,22 @@ add_executable(
     ${PROJECT_NAME}
 
     source/main.cpp
-    source/logQt/Log.cpp source/logQt/Log.h
+
     source/Log.h source/Log.cpp
 
-    source/InstagramDownloader/Log.h source/InstagramDownloader/Log.cpp
-    source/InstagramDownloader/LogQML.h source/InstagramDownloader/LogQML.cpp
-    source/InstagramDownloader/LogSession.h source/InstagramDownloader/LogSession.cpp
-    source/InstagramDownloader/LogSessionPart.h source/InstagramDownloader/LogSessionPart.cpp
+    # source/logQt/Log.cpp source/logQt/Log.h
+    # source/trying_using_object/Log.h source/trying_using_object/Log.cpp
 
-    source/Petanque/Log.h source/Petanque/Log.cpp
-    source/Petanque/LogQML.h source/Petanque/LogQML.cpp
-    source/Petanque/LogSession.h source/Petanque/LogSession.cpp
-    source/Petanque/LogSessionPart.h source/Petanque/LogSessionPart.cpp
+    # source/InstagramDownloader/Log.h source/InstagramDownloader/Log.cpp
+    # source/InstagramDownloader/LogQML.h source/InstagramDownloader/LogQML.cpp
+    # source/InstagramDownloader/LogSession.h source/InstagramDownloader/LogSession.cpp
+    # source/InstagramDownloader/LogSessionPart.h source/InstagramDownloader/LogSessionPart.cpp
+
+    # source/Petanque/Log.h source/Petanque/Log.cpp
+    # source/Petanque/LogQML.h source/Petanque/LogQML.cpp
+    # source/Petanque/LogSession.h source/Petanque/LogSession.cpp
+    # source/Petanque/LogSessionPart.h source/Petanque/LogSessionPart.cpp
+    # source/Petanque/LogTypeEnum.h source/Petanque/LogTypeEnum.cpp
 )
 
 # file(GLOB RESOURCE_FILES_LIST "${CMAKE_SOURCE_DIR}/resources/*")

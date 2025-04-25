@@ -56,75 +56,12 @@ build CMakeFiles/Log.dir/source/main.cpp.obj: CXX_COMPILER__Log_unscanned_Debug 
   OBJECT_DIR = CMakeFiles\Log.dir
   OBJECT_FILE_DIR = CMakeFiles\Log.dir\source
 
-build CMakeFiles/Log.dir/source/logQt/Log.cpp.obj: CXX_COMPILER__Log_unscanned_Debug D$:/QtCreator/0_extension_usage/Log/source/logQt/Log.cpp || cmake_object_order_depends_target_Log
-  DEP_FILE = CMakeFiles\Log.dir\source\logQt\Log.cpp.obj.d
-  FLAGS = -DQT_QML_DEBUG -g -std=gnu++17 -fdiagnostics-color=always
-  INCLUDES = -ID:/QtCreator/0_extension_usage/Log/source
-  OBJECT_DIR = CMakeFiles\Log.dir
-  OBJECT_FILE_DIR = CMakeFiles\Log.dir\source\logQt
-
 build CMakeFiles/Log.dir/source/Log.cpp.obj: CXX_COMPILER__Log_unscanned_Debug D$:/QtCreator/0_extension_usage/Log/source/Log.cpp || cmake_object_order_depends_target_Log
   DEP_FILE = CMakeFiles\Log.dir\source\Log.cpp.obj.d
   FLAGS = -DQT_QML_DEBUG -g -std=gnu++17 -fdiagnostics-color=always
   INCLUDES = -ID:/QtCreator/0_extension_usage/Log/source
   OBJECT_DIR = CMakeFiles\Log.dir
   OBJECT_FILE_DIR = CMakeFiles\Log.dir\source
-
-build CMakeFiles/Log.dir/source/InstagramDownloader/Log.cpp.obj: CXX_COMPILER__Log_unscanned_Debug D$:/QtCreator/0_extension_usage/Log/source/InstagramDownloader/Log.cpp || cmake_object_order_depends_target_Log
-  DEP_FILE = CMakeFiles\Log.dir\source\InstagramDownloader\Log.cpp.obj.d
-  FLAGS = -DQT_QML_DEBUG -g -std=gnu++17 -fdiagnostics-color=always
-  INCLUDES = -ID:/QtCreator/0_extension_usage/Log/source
-  OBJECT_DIR = CMakeFiles\Log.dir
-  OBJECT_FILE_DIR = CMakeFiles\Log.dir\source\InstagramDownloader
-
-build CMakeFiles/Log.dir/source/InstagramDownloader/LogQML.cpp.obj: CXX_COMPILER__Log_unscanned_Debug D$:/QtCreator/0_extension_usage/Log/source/InstagramDownloader/LogQML.cpp || cmake_object_order_depends_target_Log
-  DEP_FILE = CMakeFiles\Log.dir\source\InstagramDownloader\LogQML.cpp.obj.d
-  FLAGS = -DQT_QML_DEBUG -g -std=gnu++17 -fdiagnostics-color=always
-  INCLUDES = -ID:/QtCreator/0_extension_usage/Log/source
-  OBJECT_DIR = CMakeFiles\Log.dir
-  OBJECT_FILE_DIR = CMakeFiles\Log.dir\source\InstagramDownloader
-
-build CMakeFiles/Log.dir/source/InstagramDownloader/LogSession.cpp.obj: CXX_COMPILER__Log_unscanned_Debug D$:/QtCreator/0_extension_usage/Log/source/InstagramDownloader/LogSession.cpp || cmake_object_order_depends_target_Log
-  DEP_FILE = CMakeFiles\Log.dir\source\InstagramDownloader\LogSession.cpp.obj.d
-  FLAGS = -DQT_QML_DEBUG -g -std=gnu++17 -fdiagnostics-color=always
-  INCLUDES = -ID:/QtCreator/0_extension_usage/Log/source
-  OBJECT_DIR = CMakeFiles\Log.dir
-  OBJECT_FILE_DIR = CMakeFiles\Log.dir\source\InstagramDownloader
-
-build CMakeFiles/Log.dir/source/InstagramDownloader/LogSessionPart.cpp.obj: CXX_COMPILER__Log_unscanned_Debug D$:/QtCreator/0_extension_usage/Log/source/InstagramDownloader/LogSessionPart.cpp || cmake_object_order_depends_target_Log
-  DEP_FILE = CMakeFiles\Log.dir\source\InstagramDownloader\LogSessionPart.cpp.obj.d
-  FLAGS = -DQT_QML_DEBUG -g -std=gnu++17 -fdiagnostics-color=always
-  INCLUDES = -ID:/QtCreator/0_extension_usage/Log/source
-  OBJECT_DIR = CMakeFiles\Log.dir
-  OBJECT_FILE_DIR = CMakeFiles\Log.dir\source\InstagramDownloader
-
-build CMakeFiles/Log.dir/source/Petanque/Log.cpp.obj: CXX_COMPILER__Log_unscanned_Debug D$:/QtCreator/0_extension_usage/Log/source/Petanque/Log.cpp || cmake_object_order_depends_target_Log
-  DEP_FILE = CMakeFiles\Log.dir\source\Petanque\Log.cpp.obj.d
-  FLAGS = -DQT_QML_DEBUG -g -std=gnu++17 -fdiagnostics-color=always
-  INCLUDES = -ID:/QtCreator/0_extension_usage/Log/source
-  OBJECT_DIR = CMakeFiles\Log.dir
-  OBJECT_FILE_DIR = CMakeFiles\Log.dir\source\Petanque
-
-build CMakeFiles/Log.dir/source/Petanque/LogQML.cpp.obj: CXX_COMPILER__Log_unscanned_Debug D$:/QtCreator/0_extension_usage/Log/source/Petanque/LogQML.cpp || cmake_object_order_depends_target_Log
-  DEP_FILE = CMakeFiles\Log.dir\source\Petanque\LogQML.cpp.obj.d
-  FLAGS = -DQT_QML_DEBUG -g -std=gnu++17 -fdiagnostics-color=always
-  INCLUDES = -ID:/QtCreator/0_extension_usage/Log/source
-  OBJECT_DIR = CMakeFiles\Log.dir
-  OBJECT_FILE_DIR = CMakeFiles\Log.dir\source\Petanque
-
-build CMakeFiles/Log.dir/source/Petanque/LogSession.cpp.obj: CXX_COMPILER__Log_unscanned_Debug D$:/QtCreator/0_extension_usage/Log/source/Petanque/LogSession.cpp || cmake_object_order_depends_target_Log
-  DEP_FILE = CMakeFiles\Log.dir\source\Petanque\LogSession.cpp.obj.d
-  FLAGS = -DQT_QML_DEBUG -g -std=gnu++17 -fdiagnostics-color=always
-  INCLUDES = -ID:/QtCreator/0_extension_usage/Log/source
-  OBJECT_DIR = CMakeFiles\Log.dir
-  OBJECT_FILE_DIR = CMakeFiles\Log.dir\source\Petanque
-
-build CMakeFiles/Log.dir/source/Petanque/LogSessionPart.cpp.obj: CXX_COMPILER__Log_unscanned_Debug D$:/QtCreator/0_extension_usage/Log/source/Petanque/LogSessionPart.cpp || cmake_object_order_depends_target_Log
-  DEP_FILE = CMakeFiles\Log.dir\source\Petanque\LogSessionPart.cpp.obj.d
-  FLAGS = -DQT_QML_DEBUG -g -std=gnu++17 -fdiagnostics-color=always
-  INCLUDES = -ID:/QtCreator/0_extension_usage/Log/source
-  OBJECT_DIR = CMakeFiles\Log.dir
-  OBJECT_FILE_DIR = CMakeFiles\Log.dir\source\Petanque
 
 
 # =============================================================================
@@ -134,7 +71,7 @@ build CMakeFiles/Log.dir/source/Petanque/LogSessionPart.cpp.obj: CXX_COMPILER__L
 #############################################
 # Link the executable Log.exe
 
-build Log.exe: CXX_EXECUTABLE_LINKER__Log_Debug CMakeFiles/Log.dir/source/main.cpp.obj CMakeFiles/Log.dir/source/logQt/Log.cpp.obj CMakeFiles/Log.dir/source/Log.cpp.obj CMakeFiles/Log.dir/source/InstagramDownloader/Log.cpp.obj CMakeFiles/Log.dir/source/InstagramDownloader/LogQML.cpp.obj CMakeFiles/Log.dir/source/InstagramDownloader/LogSession.cpp.obj CMakeFiles/Log.dir/source/InstagramDownloader/LogSessionPart.cpp.obj CMakeFiles/Log.dir/source/Petanque/Log.cpp.obj CMakeFiles/Log.dir/source/Petanque/LogQML.cpp.obj CMakeFiles/Log.dir/source/Petanque/LogSession.cpp.obj CMakeFiles/Log.dir/source/Petanque/LogSessionPart.cpp.obj
+build Log.exe: CXX_EXECUTABLE_LINKER__Log_Debug CMakeFiles/Log.dir/source/main.cpp.obj CMakeFiles/Log.dir/source/Log.cpp.obj
   FLAGS = -DQT_QML_DEBUG -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\Log.dir
