@@ -75,7 +75,7 @@ std::string Log::asprintf(const char *text, ...)
 
     va_list argsCopy;
     va_copy(argsCopy, args);
-    const int size = vsnprintf(nullptr, 0, text, argsCopy) + 2;
+    const int size = vsnprintf(nullptr, 0, text, argsCopy);
     va_end(argsCopy);
 
     if (size <= 0) {
@@ -83,8 +83,9 @@ std::string Log::asprintf(const char *text, ...)
         return "";
     }
 
-    std::unique_ptr<char[]> buffer = std::make_unique<char[]>(size);
-    vsnprintf(buffer.get(), size, text, args);
+
+    std::unique_ptr<char[]> buffer = std::make_unique<char[]>(size+1);
+    vsnprintf(buffer.get(), size+1, text, args);
     va_end(args);
 
     return std::string(buffer.get(), size);
