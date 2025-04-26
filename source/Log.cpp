@@ -91,6 +91,18 @@ std::string Log::asprintf(const char *text, ...)
     return std::string(buffer.get(), size);
 }
 
+std::string Log::asprintf(cstr text, ...)
+{
+    va_list args;
+    va_start(args, text.c_str());
+
+    std::string str = Log::asprintf(text.c_str(), args);
+
+    va_end(args);
+
+    return str;
+}
+
 
 std::string Log::time()
 {

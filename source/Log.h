@@ -16,14 +16,14 @@
 #define DISPLAY_OBJECT_LIFE_TIME true
 
 /// Display Object Life Time Variable - Force
-#define DOLTV_F(ptr, argsStr) {                                         \
-    std::string f_name(__FUNCTION__);                                   \
-    if(f_name.empty())      f_name = "unknown action";                  \
-    if(f_name[0] == '~')    f_name = "Destroying " + f_name;            \
-    else                    f_name = "Creating " + f_name;              \
-    std::string qargsStr(argsStr);                                      \
-    if(!qargsStr.empty()) qargsStr = "(" + qargsStr + ")";             \
-    D(f_name + qargsStr + SAPF(": %p", ptr), Log::Action::SaveSession); \
+#define DOLTV_F(ptr, argsStr) {                                             \
+    std::string f_name(__FUNCTION__);                                       \
+    if(f_name.empty())      f_name = "unknown action";                      \
+    if(f_name[0] == '~')    f_name = "Destroying " + f_name;                \
+    else                    f_name = "Creating " + f_name;                  \
+    std::string qargsStr(argsStr);                                          \
+    if(!qargsStr.empty()) qargsStr = "(" + qargsStr + ")";                  \
+    DA(Log::Action::SaveSession, f_name + qargsStr + SAPF(": %p", ptr));    \
 }
 
 /// Display Object Life Time - Force
@@ -38,25 +38,15 @@
 
 
 
-//////////////////// NEW DEBUG ////////////////////
-#define GET_MACRO(_1, _2, NAME, ...) NAME
+#define I(...) Log::info    (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__))
+#define W(...) Log::warning (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__))
+#define E(...) Log::error   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__))
+#define D(...) Log::debug   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__))
 
-#define I_1(x) Log::info    (__PRETTY_FUNCTION__, (x));
-#define W_1(x) Log::warning (__PRETTY_FUNCTION__, (x));
-#define E_1(x) Log::error   (__PRETTY_FUNCTION__, (x));
-#define D_1(x) Log::debug   (__PRETTY_FUNCTION__, (x));
-
-#define I_2(x, a) Log::info    (__PRETTY_FUNCTION__, (x), Log::Action(a));
-#define W_2(x, a) Log::warning (__PRETTY_FUNCTION__, (x), Log::Action(a));
-#define E_2(x, a) Log::error   (__PRETTY_FUNCTION__, (x), Log::Action(a));
-#define D_2(x, a) Log::debug   (__PRETTY_FUNCTION__, (x), Log::Action(a));
-
-#define I(...) GET_MACRO(__VA_ARGS__, I_2, I_1)(__VA_ARGS__)
-#define W(...) GET_MACRO(__VA_ARGS__, W_2, W_1)(__VA_ARGS__)
-#define E(...) GET_MACRO(__VA_ARGS__, E_2, E_1)(__VA_ARGS__)
-#define D(...) GET_MACRO(__VA_ARGS__, D_2, D_1)(__VA_ARGS__)
-//////////////////////////////////////////////////
-
+#define IA(a, ...) Log::info    (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a));
+#define WA(a, ...) Log::warning (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a));
+#define EA(a, ...) Log::error   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a));
+#define DA(a, ...) Log::debug   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a));
 
 
 
@@ -102,6 +92,7 @@ public:
     static void debug(cstr func, cstr log, Action action = Action(Action::All));
 
     static std::string asprintf(const char *text, ...);
+    static std::string asprintf(cstr text, ...);
 
 private:
     static std::string time();

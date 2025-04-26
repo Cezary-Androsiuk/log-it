@@ -19,10 +19,11 @@ public:
 int main(){
     C c;
     c.x = 1234;
-    printf("qwe\n");
+    printf("qwea\n");
     I("12345");
     auto s = SAPF("1234");
     I("12345");
 
     D(SAPF("%d", c.x));
+    D("%d", c.x);
 }
