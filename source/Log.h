@@ -6,6 +6,7 @@
 #include <vector>
 #include <fstream>
 #include <cstdarg> // va_list
+#include <filesystem>
 
 // #include "LogSession.h"
 
@@ -17,7 +18,7 @@
 
 /// Display Object Life Time Variable - Force
 #define DOLTV_F(ptr, argsStr) {                                             \
-    std::string f_name(__FUNCTION__);                                       \
+std::string f_name(__FUNCTION__);                                       \
     if(f_name.empty())      f_name = "unknown action";                      \
     if(f_name[0] == '~')    f_name = "Destroying " + f_name;                \
     else                    f_name = "Creating " + f_name;                  \
@@ -51,14 +52,14 @@
 
 
 
-extern const char *logFile;
-#define EST_FUNCTION_LENGTH 90 // estimated function name length what will be reserved while creating log
+extern const char *outputDirectory;
+#define EST_FUNCTION_LENGTH 70 // estimated function name length what will be reserved while creating log
 #define SHORTER_FUNCTION_FILL_CHARACTER ' ' // characters that fills area before function name to fit estimated function name length
 #define CONTENT_SPACE 10 // space between function name and content
 #define CONTENT_SPACE_CHARACTER ' ' // characters that fills space between function name and content
 #define SPACE_BETWEEN_CONTENT_SPACE_AND_CONTENT true // creates spaces between space: "x ........ y" instead of "x........y"
 
-    class Log
+class Log
 {
 public:
     enum class Type{
@@ -95,16 +96,16 @@ public:
     static std::string asprintf(cstr text, ...);
 
 private:
-    static std::string time();
-    static std::string buildPrefix(Type logType, cstr function, bool time = false);
+    static std::string time(bool simpleSeparators = false);
+    static std::string buildPrefix(Type logType, cstr funName);
     static std::string buildStartPrefix();
 
-    static void log(Type logType, cstr function, cstr log, Action action = Action::All);
-    static void safeLog(Type logType, cstr function, cstr log, Action action = Action::All);
+    static void log(Type logType, cstr funName, cstr log, Action action = Action::All);
+    static void safeLog(Type logType, cstr funName, cstr log, Action action = Action::All);
     static void print(cstr content);
     static void saveFile(cstr content);
     static void addSession(cstr content);
-    // static void addSession(Type logType, cstr function, cstr message);
+    // static void addSession(Type logType, cstr funName, cstr message);
 
 public:
     class Convert{
@@ -117,6 +118,7 @@ public:
     // static LogSession currentSession;
     static std::string currentSession;
 
+    static std::string fileName;
     static std::ofstream outFile;
 };
 

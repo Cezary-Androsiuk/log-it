@@ -6,12 +6,13 @@
 #include <memory>
 #include <cstring>
 
-const char *logFile = "application_logs.log";
+const char *outputDirectory = "logs/";
 
 bool Log::firstLog = true;
 
 // LogSession Log::currentSession = LogSession();
 std::string Log::currentSession = std::string();
+std::string Log::fileName;
 std::ofstream Log::outFile;
 
 const char *Log::logTypeToStr(Type type)
@@ -104,7 +105,7 @@ std::string Log::asprintf(cstr text, ...)
 }
 
 
-std::string Log::time()
+std::string Log::time(bool simpleSeparators)
 {
     auto now = std::chrono::system_clock::now();
     auto now_time_t = std::chrono::system_clock::to_time_t(now);
@@ -114,19 +115,19 @@ std::string Log::time()
     std::tm tm = *std::localtime(&now_time_t);
 
     std::ostringstream oss;
-    oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S")
-        << '.' << std::setfill('0') << std::setw(3) << now_ms.count();
+    if(simpleSeparators)
+        oss << std::put_time(&tm, "%Y%m%d_%H%M%S_")
+            << std::setfill('0') << std::setw(3) << now_ms.count();
+    else
+        oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S.")
+            << std::setfill('0') << std::setw(3) << now_ms.count();
 
     return oss.str();
 }
 
-std::string Log::buildPrefix(Log::Type logType, cstr function, bool time)
+std::string Log::buildPrefix(Log::Type logType, cstr funName)
 {
     std::string prefix;
-
-    // set time
-    if(time)
-        prefix = "[" + Log::time() +  "]" + " ";
 
     // set type
     switch (logType) {
@@ -142,13 +143,13 @@ std::string Log::buildPrefix(Log::Type logType, cstr function, bool time)
     }
 
     // set function name
-    if(function.length() >= EST_FUNCTION_LENGTH)
-        prefix += function;
+    if(funName.length() >= EST_FUNCTION_LENGTH)
+        prefix += funName;
     else
     {
-        size_t fill = EST_FUNCTION_LENGTH - function.length() - prefix.size();
+        size_t fill = EST_FUNCTION_LENGTH - funName.length() - prefix.size();
         prefix += std::string(fill, SHORTER_FUNCTION_FILL_CHARACTER);
-        prefix += function;
+        prefix += funName;
     }
 
 #if SPACE_BETWEEN_CONTENT_SPACE_AND_CONTENT
@@ -172,29 +173,29 @@ std::string Log::buildStartPrefix()
         std::string(EST_FUNCTION_LENGTH -8 -28 +3, '-');
 
     std::string prefix;
-    prefix = "\n\n" "[" + Log::time() +  "]";
+    prefix = /*"\n\n"*/ "[" + Log::time() +  "]";
 
     return prefix + spaceText + startText + spaceText;
 }
 
-void Log::log(Log::Type logType, cstr function, cstr log, Log::Action action)
+void Log::log(Log::Type logType, cstr funName, cstr log, Log::Action action)
 {
     Action limitedAction = Action( (action | Log::actionForceLowest) & Log::actionForceHighest );
 
-    std::string logWithTime = buildPrefix(logType, function, true) + log;
-    std::string logWithoutTime = buildPrefix(logType, function, false) + log;
+    const std::string time = "[" + Log::time() +  "]" + " ";
+    const std::string prefix = buildPrefix(logType, funName);
 
     if(limitedAction & Action::Print)
-        Log::print(logWithoutTime);
+        Log::print(prefix + log);
 
     if(limitedAction & Action::Save)
-        Log::saveFile(logWithTime);
+        Log::saveFile(time + prefix + log);
 
     try{
         if(limitedAction & Action::Session)
         {
-            Log::addSession(logWithoutTime);
-            // Log::addSession(logType, function, log);
+            Log::addSession(prefix + log);
+            // Log::addSession(logType, funName, log);
         }
     }
     catch (...) {
@@ -206,10 +207,10 @@ void Log::log(Log::Type logType, cstr function, cstr log, Log::Action action)
         firstLog = false;
 }
 
-void Log::safeLog(Log::Type logType, cstr function, cstr log, Action action)
+void Log::safeLog(Log::Type logType, cstr funName, cstr log, Action action)
 {
     try {
-        Log::log(logType, function, log, action);
+        Log::log(logType, funName, log, action);
     } catch (...) {
         fprintf(stderr, "logging failed\n");
         fflush(stderr);
@@ -224,9 +225,21 @@ void Log::print(cstr content)
 
 void Log::saveFile(cstr content)
 {
-    if(firstLog)
+    if(!outFile.is_open())
     {
-        outFile.open(logFile, std::ios::app);
+        if(!std::filesystem::exists(outputDirectory))
+        {
+            if(std::filesystem::create_directory(outputDirectory))
+            {
+                fprintf(stderr, "cannot create '%s' output directory\n");
+                fflush(stderr);
+                return;
+            }
+        }
+
+        fileName = outputDirectory + Log::time(true) + ".log";
+
+        outFile.open(fileName, std::ios::app);
         if(!outFile.is_open())
         {
             fprintf(stderr, "Error while creating log file!\n");
@@ -246,9 +259,9 @@ void Log::addSession(cstr content)
     Log::currentSession += content + "\n";
 }
 
-// void Log::addSession(Log::Type logType, const QString &function, const QString &message)
+// void Log::addSession(Log::Type logType, const QString &funName, const QString &message)
 // {
-//     Log::currentSession.addPart(logType, function, message);
+//     Log::currentSession.addPart(logType, funName, message);
 // }
 
 std::string Log::Convert::vectorToString(std::vector<std::string> list)
