@@ -11,6 +11,8 @@ public:
     ~C(){
         DOLT(this);
         DOLTV(this, "abc");
+        DOLTV(this, "abc");
+        DOLTV(this, "abc");
     }
 
     int x;

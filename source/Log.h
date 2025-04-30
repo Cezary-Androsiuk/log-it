@@ -18,7 +18,7 @@
 
 /// Display Object Life Time Variable - Force
 #define DOLTV_F(ptr, argsStr) {                                             \
-std::string f_name(__FUNCTION__);                                       \
+    std::string f_name(__FUNCTION__);                                       \
     if(f_name.empty())      f_name = "unknown action";                      \
     if(f_name[0] == '~')    f_name = "Destroying " + f_name;                \
     else                    f_name = "Creating " + f_name;                  \
