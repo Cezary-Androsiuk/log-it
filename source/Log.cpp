@@ -5,6 +5,7 @@
 #include <sstream>
 #include <memory>
 #include <cstring>
+#include <filesystem>
 
 const char *version = "v1.2.0";
 const char *outputDirectory = "logs/";

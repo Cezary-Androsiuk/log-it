@@ -6,7 +6,6 @@
 #include <vector>
 #include <fstream>
 #include <cstdarg> // va_list
-#include <filesystem>
 
 // #include "LogSession.h"
 
