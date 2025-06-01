@@ -13,18 +13,21 @@
 extern const char *version;
 extern const char *outputDirectory;
 
-#define ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME false
-#define EST_FUNCTION_LENGTH 70 // estimated function name length what will be reserved while creating log
-#define SHORTER_FUNCTION_FILL_CHARACTER ' ' // characters that fills area before function name to fit estimated function name length
-#define CONTENT_SPACE 10 // space between function name and content
-#define CONTENT_SPACE_CHARACTER ' ' // characters that fills space between function name and content
-#define SPACE_BETWEEN_CONTENT_SPACE_AND_CONTENT true // creates spaces between space: "x ........ y" instead of "x........y"
-#define DISPLAY_OBJECT_LIFE_TIME true
-#define ENABLE_TRACE_LOGGING true
+#define ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME false /// decides if 'SingletonManager' class is a friend and could manage singleton life time by Log::instance
+#define EST_FUNCTION_LENGTH 70 /// estimated function name length what will be reserved while creating log
+#define SHORTER_FUNCTION_FILL_CHARACTER ' ' /// characters that fills area before function name to fit estimated function name length
+#define CONTENT_SPACE 10 /// space between function name and content
+#define CONTENT_SPACE_CHARACTER ' ' /// characters that fills space between function name and content
+#define SPACE_BETWEEN_CONTENT_SPACE_AND_CONTENT true /// creates spaces between space: "x ........ y" instead of "x........y"
+#define DISPLAY_OBJECT_LIFE_TIME true /// decides if Display Object Life Time (DOLT) is enabled
+#define ENABLE_TRACE_LOGGING true /// decides if trace logging is enabled and functions names will be saved to logs
 
 
+/// String As PrintF
+#define SAPF(...) Log::asprintf(__VA_ARGS__)
 
-#define SAPF(...) Log::asprintf(__VA_ARGS__) /* string as printf */
+/// DOLT wtih 'Force' allows to disable all other DOLT and focus on only one class
+/// DOLT Variable (DOLTV) allows to pass arguments that are used in constructor/destructor
 
 /// Display Object Life Time Variable - Force
 #define DOLTV_F(ptr, argsStr) {                                             \
@@ -40,11 +43,19 @@ extern const char *outputDirectory;
 /// Display Object Life Time - Force
 #define DOLT_F(ptr) DOLTV_F(ptr, "")
 
-/// Display Object Life Time Variable
-#define DOLTV(ptr, argsStr) if(DISPLAY_OBJECT_LIFE_TIME) { DOLTV_F(ptr, argsStr) }
+#if DISPLAY_OBJECT_LIFE_TIME
+    /// Display Object Life Time Variable
+    #define DOLTV(ptr, argsStr) DOLTV_F(ptr, argsStr)
 
-/// Display Object Life Time
-#define DOLT(ptr) DOLTV(ptr, "")
+    /// Display Object Life Time
+    #define DOLT(ptr) DOLTV(ptr, "")
+#else
+    /// Display Object Life Time Variable
+    #define DOLTV(ptr, argsStr)
+
+    /// Display Object Life Time
+    #define DOLT(ptr)
+#endif
 
 
 
@@ -95,8 +106,8 @@ public:
 
     typedef const std::string &cstr;
 
-    static constexpr Action actionForceHighest = Action::All; // set highest ( will be compared with & sign )
-    static constexpr Action actionForceLowest = Action::None;  // set lowest ( will be compared with | sign )
+    static constexpr Action actionForceHighest = Action::All; /// set highest ( will be compared with & sign )
+    static constexpr Action actionForceLowest = Action::None;  /// set lowest ( will be compared with | sign )
 
     static Log *getInstance();
 
