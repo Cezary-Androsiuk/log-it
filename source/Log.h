@@ -59,21 +59,20 @@ extern const char *outputDirectory;
 
 
 
+#define I(...) Log::getInstance()->info    (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) /// info
+#define W(...) Log::getInstance()->warning (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) /// warning
+#define E(...) Log::getInstance()->error   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) /// error
+#define D(...) Log::getInstance()->debug   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) /// debug
+#define R(...) Log::getInstance()->raw     (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) /// raw
 
-#define I(...) Log::getInstance()->info    (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) // info
-#define W(...) Log::getInstance()->warning (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) // warning
-#define E(...) Log::getInstance()->error   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) // error
-#define D(...) Log::getInstance()->debug   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) // debug
-#define R(...) Log::getInstance()->raw     (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) // raw
-
-#define IA(a, ...) Log::getInstance()->info    (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); // info
-#define WA(a, ...) Log::getInstance()->warning (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); // warning
-#define EA(a, ...) Log::getInstance()->error   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); // error
-#define DA(a, ...) Log::getInstance()->debug   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); // debug
-#define RA(a, ...) Log::getInstance()->raw     (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); // raw
+#define IA(a, ...) Log::getInstance()->info    (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); /// info
+#define WA(a, ...) Log::getInstance()->warning (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); /// warning
+#define EA(a, ...) Log::getInstance()->error   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); /// error
+#define DA(a, ...) Log::getInstance()->debug   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); /// debug
+#define RA(a, ...) Log::getInstance()->raw     (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); /// raw
 
 #if ENABLE_TRACE_LOGGING
-#define T Log::getInstance()->trace     (__FILE__, /*__FUNCTION__,*/ __PRETTY_FUNCTION__, __LINE__); // trace
+#define T Log::getInstance()->trace     (__FILE__, /*__FUNCTION__,*/ __PRETTY_FUNCTION__, __LINE__); /// trace
 #else
 #define T
 #endif
