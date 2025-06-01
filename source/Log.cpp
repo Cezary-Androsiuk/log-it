@@ -7,7 +7,7 @@
 #include <cstring>
 #include <filesystem>
 
-const char *version = "v1.2.0";
+const char *version = "v1.3.0";
 const char *outputDirectory = "logs/";
 
 #if ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME

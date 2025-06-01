@@ -72,7 +72,7 @@ extern const char *outputDirectory;
 #define RA(a, ...) Log::getInstance()->raw     (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); /// raw
 
 #if ENABLE_TRACE_LOGGING
-#define TR Log::getInstance()->trace     (__FILE__, /*__FUNCTION__,*/ __PRETTY_FUNCTION__, __LINE__); /// trace
+#define TR Log::getInstance()->trace        (__FILE__, /*__FUNCTION__,*/ __PRETTY_FUNCTION__, __LINE__); /// trace
 #else
 #define TR
 #endif
