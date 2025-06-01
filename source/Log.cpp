@@ -51,7 +51,6 @@ const char *Log::logActionToStr(Action action)
 
 Log *Log::getInstance()
 {
-    
 #if ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME
     return Log::instance; /// handled by SingletonManager
 #else
@@ -108,7 +107,7 @@ void Log::trace(std::string file, cstr func, int line)
     }
 
     std::string strLine = asprintf("%6d", line); /// assert that any file not contains more than 1 milion lines
-    std::string traceText = "" + file + "|" + std::to_string(line) + "|" + func;
+    std::string traceText = "" + file + "|" + strLine + "|" + func;
 
     /// to create algorithm reading trace path:
     /// 1. find "] T " pattern
@@ -171,7 +170,6 @@ const std::string &Log::getCurrentSession() const
 // {
 //     return m_currentSession;
 // }
-
 
 std::string Log::time(bool simpleSeparators)
 {

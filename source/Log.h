@@ -72,9 +72,9 @@ extern const char *outputDirectory;
 #define RA(a, ...) Log::getInstance()->raw     (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); /// raw
 
 #if ENABLE_TRACE_LOGGING
-#define T Log::getInstance()->trace     (__FILE__, /*__FUNCTION__,*/ __PRETTY_FUNCTION__, __LINE__); /// trace
+#define TR Log::getInstance()->trace     (__FILE__, /*__FUNCTION__,*/ __PRETTY_FUNCTION__, __LINE__); /// trace
 #else
-#define T
+#define TR
 #endif
 
 
@@ -114,6 +114,7 @@ public:
     void error(cstr func, cstr log, Action action = Action(Action::All));
     void debug(cstr func, cstr log, Action action = Action(Action::All));
     void raw(cstr func, cstr log, Action action = Action(Action::All));
+
     void trace(std::string file, cstr func, int line);
 
     static std::string asprintf(const char *text, ...);
