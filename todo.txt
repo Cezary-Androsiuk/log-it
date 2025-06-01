@@ -1,0 +1,3 @@
+1: W i E stdout -> stderr
+
+2: jeżeli wykonuje się kompilacja release nie wyświetlaj funkcji w komunikatach
