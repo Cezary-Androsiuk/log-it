@@ -10,11 +10,21 @@
 
 // #include "LogSession.h"
 
-#define SAPF(...) Log::asprintf(__VA_ARGS__) /* string as printf */
+extern const char *version;
+extern const char *outputDirectory;
 
-
-
+#define ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME false
+#define EST_FUNCTION_LENGTH 70 // estimated function name length what will be reserved while creating log
+#define SHORTER_FUNCTION_FILL_CHARACTER ' ' // characters that fills area before function name to fit estimated function name length
+#define CONTENT_SPACE 10 // space between function name and content
+#define CONTENT_SPACE_CHARACTER ' ' // characters that fills space between function name and content
+#define SPACE_BETWEEN_CONTENT_SPACE_AND_CONTENT true // creates spaces between space: "x ........ y" instead of "x........y"
 #define DISPLAY_OBJECT_LIFE_TIME true
+#define ENABLE_TRACE_LOGGING true
+
+
+
+#define SAPF(...) Log::asprintf(__VA_ARGS__) /* string as printf */
 
 /// Display Object Life Time Variable - Force
 #define DOLTV_F(ptr, argsStr) {                                             \
@@ -39,6 +49,7 @@
 
 
 
+
 #define I(...) Log::getInstance()->info    (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) // info
 #define W(...) Log::getInstance()->warning (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) // warning
 #define E(...) Log::getInstance()->error   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) // error
@@ -51,16 +62,12 @@
 #define DA(a, ...) Log::getInstance()->debug   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); // debug
 #define RA(a, ...) Log::getInstance()->raw     (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); // raw
 
+#if ENABLE_TRACE_LOGGING
+#define T Log::getInstance()->trace     (__FILE__, /*__FUNCTION__,*/ __PRETTY_FUNCTION__, __LINE__); // trace
+#else
+#define T
+#endif
 
-
-extern const char *outputDirectory;
-
-#define ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME false
-#define EST_FUNCTION_LENGTH 70 // estimated function name length what will be reserved while creating log
-#define SHORTER_FUNCTION_FILL_CHARACTER ' ' // characters that fills area before function name to fit estimated function name length
-#define CONTENT_SPACE 10 // space between function name and content
-#define CONTENT_SPACE_CHARACTER ' ' // characters that fills space between function name and content
-#define SPACE_BETWEEN_CONTENT_SPACE_AND_CONTENT true // creates spaces between space: "x ........ y" instead of "x........y"
 
 class Log
 {
@@ -98,6 +105,7 @@ public:
     void error(cstr func, cstr log, Action action = Action(Action::All));
     void debug(cstr func, cstr log, Action action = Action(Action::All));
     void raw(cstr func, cstr log, Action action = Action(Action::All));
+    void trace(std::string file, cstr func, int line);
 
     static std::string asprintf(const char *text, ...);
     static std::string asprintf(cstr text, ...);

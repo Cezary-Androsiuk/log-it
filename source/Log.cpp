@@ -6,6 +6,7 @@
 #include <memory>
 #include <cstring>
 
+const char *version = "v1.2.0";
 const char *outputDirectory = "logs/";
 
 #if ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME
@@ -81,6 +82,46 @@ void Log::debug(cstr func, cstr log, Log::Action action)
 void Log::raw(cstr func, cstr log, Action action)
 {
     this->safeLog(Type::Raw, func, log, action);
+}
+
+void Log::trace(std::string file, cstr func, int line)
+{
+    std::string time;
+
+    try{
+        time = "[" + this->time() +  "]" + " ";
+    }
+    catch (const std::exception &e) {
+        fprintf(stderr, "creating time prefix failed, reason: %s\n", e.what());
+        fflush(stderr);
+    }
+
+
+    /// assert path for the project (while compilation) not contains '|' sign
+    /// or in worst case at least not contains pattern like "| 0123 |" - start and end with '|', and numers with space inside
+    /// but better change any occurance to #, because path is not that required
+    for(int i=0; i<file.size(); i++)
+    {
+        if(file[i] == '|')
+            file[i] = '#';
+    }
+
+    std::string strLine = asprintf("%6d", line); /// assert that any file not contains more than 1 milion lines
+    std::string traceText = "" + file + "|" + std::to_string(line) + "|" + func;
+
+    /// to create algorithm reading trace path:
+    /// 1. find "] T " pattern
+    /// 2. copy letters to path string until '|' occur
+    /// 3. copy letters to line string until '|' occur again (string shoud be trimmed from all space characters)
+    /// 4. copy letters that left to function name string
+
+    try{
+        this->saveFile(time + "T " + traceText);
+    }
+    catch (const std::exception &e) {
+        fprintf(stderr, "saving trace failed, reason: %s\n", e.what());
+        fflush(stderr);
+    }
 }
 
 std::string Log::asprintf(const char *text, ...)
