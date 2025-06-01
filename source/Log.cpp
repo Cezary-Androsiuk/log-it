@@ -8,12 +8,9 @@
 
 const char *outputDirectory = "logs/";
 
-bool Log::firstLog = true;
-
-// LogSession Log::currentSession = LogSession();
-std::string Log::currentSession = std::string();
-std::string Log::fileName;
-std::ofstream Log::outFile;
+#if ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME
+Log *Log::instance = nullptr;
+#endif
 
 const char *Log::logTypeToStr(Type type)
 {
@@ -50,29 +47,40 @@ const char *Log::logActionToStr(Action action)
     return "<unknown Log::Action>";
 }
 
+Log *Log::getInstance()
+{
+    
+#if ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME
+    return Log::instance; /// handled by SingletonManager
+#else
+    static Log log;
+    return &log;
+#endif
+}
+
 void Log::info(cstr func, cstr log, Log::Action action)
 {
-    Log::safeLog(Type::Info, func, log, action);
+    this->safeLog(Type::Info, func, log, action);
 }
 
 void Log::warning(cstr func, cstr log, Log::Action action)
 {
-    Log::safeLog(Type::Warning, func, log, action);
+    this->safeLog(Type::Warning, func, log, action);
 }
 
 void Log::error(cstr func, cstr log, Log::Action action)
 {
-    Log::safeLog(Type::Error, func, log, action);
+    this->safeLog(Type::Error, func, log, action);
 }
 
 void Log::debug(cstr func, cstr log, Log::Action action)
 {
-    Log::safeLog(Type::Debug, func, log, action);
+    this->safeLog(Type::Debug, func, log, action);
 }
 
 void Log::raw(cstr func, cstr log, Action action)
 {
-    Log::safeLog(Type::Raw, func, log, action);
+    this->safeLog(Type::Raw, func, log, action);
 }
 
 std::string Log::asprintf(const char *text, ...)
@@ -101,6 +109,8 @@ std::string Log::asprintf(const char *text, ...)
 std::string Log::asprintf(cstr text, ...)
 {
     va_list args;
+    #pragma clang diagnostic ignored "-Wvarargs" /// qtcreator uses clang
+    #pragma GCC diagnostic ignored "-Wvarargs" /// compiler uses gcc
     va_start(args, text.c_str());
 
     std::string str = Log::asprintf(text.c_str(), args);
@@ -109,6 +119,16 @@ std::string Log::asprintf(cstr text, ...)
 
     return str;
 }
+
+const std::string &Log::getCurrentSession() const
+{
+    return m_currentSession;
+}
+
+// const LogSession &Log::getCurrentSession() const
+// {
+//     return m_currentSession;
+// }
 
 
 std::string Log::time(bool simpleSeparators)
@@ -154,7 +174,9 @@ std::string Log::buildPrefix(Log::Type logType, cstr funName)
         prefix += funName;
     else
     {
-        size_t fill = EST_FUNCTION_LENGTH - funName.length() - prefix.size();
+        int fill = EST_FUNCTION_LENGTH - funName.length() - prefix.size();
+        if(fill < 1)
+            fill = 1;
         prefix += std::string(fill, SHORTER_FUNCTION_FILL_CHARACTER);
         prefix += funName;
     }
@@ -175,12 +197,12 @@ std::string Log::buildPrefix(Log::Type logType, cstr funName)
 
 std::string Log::buildStartPrefix()
 {
-    static const char *startText = "--- [APPLICATION STARTED] ---";
+    static const char startText[] = "--- [APPLICATION STARTED] ---";
     static const std::string spaceText =
-        std::string(EST_FUNCTION_LENGTH -8 -28 +3, '-');
+        std::string(EST_FUNCTION_LENGTH - sizeof(startText)/2 + 3 + 4, '-');
 
     std::string prefix;
-    prefix = /*"\n\n"*/ "[" + Log::time() +  "]";
+    prefix = /*"\n\n"*/ "[" + this->time() +  "]";
 
     return prefix + spaceText + startText + spaceText;
 }
@@ -189,30 +211,58 @@ void Log::log(Log::Type logType, cstr funName, cstr log, Log::Action action)
 {
     Action limitedAction = Action( (action | Log::actionForceLowest) & Log::actionForceHighest );
 
-    const std::string time = "[" + Log::time() +  "]" + " ";
-    const std::string prefix = buildPrefix(logType, funName);
+    std::string time;
+    std::string prefix;
+
+    try{
+        time = "[" + this->time() +  "]" + " ";
+    }
+    catch (const std::exception &e) {
+        fprintf(stderr, "creating time prefix failed, reason: %s\n", e.what());
+        fflush(stderr);
+    }
+
+    try{
+        prefix = buildPrefix(logType, funName);
+    }
+    catch (const std::exception &e) {
+        fprintf(stderr, "creating log prefix failed, reason: %s\n", e.what());
+        fflush(stderr);
+    }
 
     bool isRaw = logType == Log::Type::Raw;
-    if(isRaw)
-    {
-        if(limitedAction & Action::Print)
-            Log::print(log, false);
+    try{
+        if(isRaw)
+        {
+            if(limitedAction & Action::Print)
+                this->print(log, false);
+        }
+        else
+        {
+            if(limitedAction & Action::Print)
+                this->print(prefix + log, true);
+        }
     }
-    else
-    {
-        if(limitedAction & Action::Print)
-            Log::print(prefix + log, true);
+    catch (const std::exception &e) {
+        fprintf(stderr, "printing log failed, reason: %s\n", e.what());
+        fflush(stderr);
     }
 
-    if(isRaw)
-    {
-        if(limitedAction & Action::Save)
-            Log::saveFile(time + prefix + "\n""<<START RAW>>""\n" + log + "\n""<<END RAW>>");
+    try{
+        if(isRaw)
+        {
+            if(limitedAction & Action::Save)
+                this->saveFile(time + prefix + "\n""<<START RAW>>""\n" + log + "\n""<<END RAW>>");
+        }
+        else
+        {
+            if(limitedAction & Action::Save)
+                this->saveFile(time + prefix + log);
+        }
     }
-    else
-    {
-        if(limitedAction & Action::Save)
-            Log::saveFile(time + prefix + log);
+    catch (const std::exception &e) {
+        fprintf(stderr, "saving log to file failed, reason: %s\n", e.what());
+        fflush(stderr);
     }
 
     try{
@@ -220,34 +270,31 @@ void Log::log(Log::Type logType, cstr funName, cstr log, Log::Action action)
         {
             if(limitedAction & Action::Session)
             {
-                Log::addSession(log, false);
-                // Log::addSession(logType, funName, log);
+                this->addSession(log, false);
+                // this->addSession(logType, funName, log);
             }
         }
         else
         {
             if(limitedAction & Action::Session)
             {
-                Log::addSession(prefix + log, true);
-                // Log::addSession(logType, funName, log);
+                this->addSession(prefix + log, true);
+                // this->addSession(logType, funName, log);
             }
         }
     }
-    catch (...) {
-        fprintf(stderr, "adding log to session failed\n");
+    catch (const std::exception &e) {
+        fprintf(stderr, "adding log to session failed, reason: %s\n", e.what());
         fflush(stderr);
     }
-
-    if(firstLog)
-        firstLog = false;
 }
 
 void Log::safeLog(Log::Type logType, cstr funName, cstr log, Action action)
 {
     try {
-        Log::log(logType, funName, log, action);
-    } catch (...) {
-        fprintf(stderr, "logging failed\n");
+        this->log(logType, funName, log, action);
+    } catch (const std::exception &e) {
+        fprintf(stderr, "logging failed, reason: %s\n", e.what());
         fflush(stderr);
     }
 }
@@ -260,7 +307,7 @@ void Log::print(cstr content, bool newLine)
 
 void Log::saveFile(cstr content)
 {
-    if(!outFile.is_open())
+    if(!m_outFile.is_open())
     {
         if(!std::filesystem::exists(outputDirectory))
         {
@@ -272,31 +319,31 @@ void Log::saveFile(cstr content)
             }
         }
 
-        fileName = outputDirectory + Log::time(true) + ".log";
+        m_fileName = outputDirectory + this->time(true) + ".log";
 
-        outFile.open(fileName, std::ios::app);
-        if(!outFile.is_open())
+        m_outFile.open(m_fileName, std::ios::app);
+        if(!m_outFile.is_open())
         {
             fprintf(stderr, "Error while creating log file!\n");
             fflush(stderr);
             return;
         }
 
-        outFile << Log::buildStartPrefix() << "\n";
+        m_outFile << this->buildStartPrefix() << "\n";
     }
 
-    outFile << content << "\n";
-    // outFile.flush();
+    m_outFile << content << "\n";
+    m_outFile.flush(); /// required to save logs if application crashes
 }
 
 void Log::addSession(cstr content, bool newLine)
 {
-    Log::currentSession += content + (newLine ? "\n" : "");
+    m_currentSession += content + (newLine ? "\n" : "");
 }
 
 // void Log::addSession(Log::Type logType, const QString &funName, const QString &message)
 // {
-//     Log::currentSession.addPart(logType, funName, message);
+//     m_currentSession.addPart(logType, funName, message);
 // }
 
 std::string Log::Convert::vectorToString(std::vector<std::string> list)

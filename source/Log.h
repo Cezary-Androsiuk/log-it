@@ -39,22 +39,23 @@
 
 
 
-#define I(...) Log::info    (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) // info
-#define W(...) Log::warning (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) // warning
-#define E(...) Log::error   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) // error
-#define D(...) Log::debug   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) // debug
-#define R(...) Log::raw     (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) // raw
+#define I(...) Log::getInstance()->info    (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) // info
+#define W(...) Log::getInstance()->warning (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) // warning
+#define E(...) Log::getInstance()->error   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) // error
+#define D(...) Log::getInstance()->debug   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) // debug
+#define R(...) Log::getInstance()->raw     (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) // raw
 
-#define IA(a, ...) Log::info    (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); // info
-#define WA(a, ...) Log::warning (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); // warning
-#define EA(a, ...) Log::error   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); // error
-#define DA(a, ...) Log::debug   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); // debug
-#define RA(a, ...) Log::raw     (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); // raw
-
+#define IA(a, ...) Log::getInstance()->info    (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); // info
+#define WA(a, ...) Log::getInstance()->warning (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); // warning
+#define EA(a, ...) Log::getInstance()->error   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); // error
+#define DA(a, ...) Log::getInstance()->debug   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); // debug
+#define RA(a, ...) Log::getInstance()->raw     (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); // raw
 
 
 
 extern const char *outputDirectory;
+
+#define ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME false
 #define EST_FUNCTION_LENGTH 70 // estimated function name length what will be reserved while creating log
 #define SHORTER_FUNCTION_FILL_CHARACTER ' ' // characters that fills area before function name to fit estimated function name length
 #define CONTENT_SPACE 10 // space between function name and content
@@ -90,26 +91,31 @@ public:
     static constexpr Action actionForceHighest = Action::All; // set highest ( will be compared with & sign )
     static constexpr Action actionForceLowest = Action::None;  // set lowest ( will be compared with | sign )
 
-    static void info(cstr func, cstr log, Action action = Action(Action::All));
-    static void warning(cstr func, cstr log, Action action = Action(Action::All));
-    static void error(cstr func, cstr log, Action action = Action(Action::All));
-    static void debug(cstr func, cstr log, Action action = Action(Action::All));
-    static void raw(cstr func, cstr log, Action action = Action(Action::All));
+    static Log *getInstance();
+
+    void info(cstr func, cstr log, Action action = Action(Action::All));
+    void warning(cstr func, cstr log, Action action = Action(Action::All));
+    void error(cstr func, cstr log, Action action = Action(Action::All));
+    void debug(cstr func, cstr log, Action action = Action(Action::All));
+    void raw(cstr func, cstr log, Action action = Action(Action::All));
 
     static std::string asprintf(const char *text, ...);
     static std::string asprintf(cstr text, ...);
 
-private:
-    static std::string time(bool simpleSeparators = false);
-    static std::string buildPrefix(Type logType, cstr funName);
-    static std::string buildStartPrefix();
+    const std::string &getCurrentSession() const;
+    // const LogSession &getCurrentSession() const;
 
-    static void log(Type logType, cstr funName, cstr log, Action action = Action::All);
-    static void safeLog(Type logType, cstr funName, cstr log, Action action = Action::All);
-    static void print(cstr content, bool newLine = true);
-    static void saveFile(cstr content);
-    static void addSession(cstr content, bool newLine = true);
-    // static void addSession(Type logType, cstr funName, cstr message);
+private:
+    std::string time(bool simpleSeparators = false);
+    std::string buildPrefix(Type logType, cstr funName);
+    std::string buildStartPrefix();
+
+    void log(Type logType, cstr funName, cstr log, Action action = Action::All);
+    void safeLog(Type logType, cstr funName, cstr log, Action action = Action::All);
+    void print(cstr content, bool newLine = true);
+    void saveFile(cstr content);
+    void addSession(cstr content, bool newLine = true);
+    // void addSession(Type logType, cstr funName, cstr message);
 
 public:
     class Convert{
@@ -117,13 +123,16 @@ public:
         static std::string vectorToString(std::vector<std::string> list);
     };
 
-    static bool firstLog;
+private:
+    // LogSession m_currentSession;
+    std::string m_currentSession;
 
-    // static LogSession currentSession;
-    static std::string currentSession;
-
-    static std::string fileName;
-    static std::ofstream outFile;
+    std::string m_fileName;
+    std::ofstream m_outFile;
+#if ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME
+    static Log* instance;
+    friend class SingletonManager;
+#endif
 };
 
 #endif // LOG_H
