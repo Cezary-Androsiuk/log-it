@@ -4,15 +4,32 @@
 
 class C{
 public:
-    C(){
-        DOLT(this);
-        DOLTV(this, "abc");
+    C()
+    {TR;
+        DOLT;
+        DOLTV("");
+        DOLTV("", this);
+        DOLT_F;
+        DOLTV_F("");
+        DOLTV_F("", this);
     }
-    ~C(){
-        DOLT(this);
-        DOLTV(this, "abc");
-        DOLTV(this, "abc");
-        DOLTV(this, "abc");
+    C(int a, std::string b)
+    {TR;
+        DOLT;
+        DOLTV(SAPF("a(int): %d, b(std::string) %s", a, b.c_str()));
+        DOLTV(SAPF("a(int): %d, b(std::string) %s", a, b.c_str()), this);
+        DOLT_F;
+        DOLTV_F(SAPF("a(int): %d, b(std::string) %s", a, b.c_str()));
+        DOLTV_F(SAPF("a(int): %d, b(std::string) %s", a, b.c_str()), this);
+    }
+    ~C()
+    {TR;
+        DOLT;
+        DOLTV("");
+        DOLTV("", this);
+        DOLT_F;
+        DOLTV_F("");
+        DOLTV_F("", this);
     }
 
     void f1()
@@ -60,8 +77,8 @@ void f5(int a, int b, int c, int d)
 }
 
 int main()
-{TR
-    C c;
+{TR;
+    C c, c2(1,"2");
     c.x = 1234;
 
     printf("qwea\n");

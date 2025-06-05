@@ -29,8 +29,8 @@ extern const char *traceLogsOutputDirectory;
 /// DOLT wtih 'Force' allows to disable all other DOLT and focus on only one class
 /// DOLT Variable (DOLTV) allows to pass arguments that are used in constructor/destructor
 
-/// Display Object Life Time Variable - Force
-#define DOLTV_F(ptr, argsStr) {                                             \
+/// Display Object Life Time Variable - Force - 2 arguments
+#define DOLTV_F_2(argsStr, ptr) {                                           \
     std::string f_name(__FUNCTION__);                                       \
     if(f_name.empty())      f_name = "unknown action";                      \
     if(f_name[0] == '~')    f_name = "Destroying " + f_name;                \
@@ -40,25 +40,30 @@ extern const char *traceLogsOutputDirectory;
     DA(Log::Action::SaveSession, f_name + qargsStr + SAPF(": %p", ptr));    \
 }
 
+/// Display Object Life Time Variable - Force - 1 argument
+#define DOLTV_F_1(argsStr)        DOLTV_F_2(argsStr, this);
+
+/// Display Object Life Time Variable - Force - variant arguments
+#define __DOLTV_F_GET_OVERRIDE(_1, _2, NAME, ...) NAME
+#define DOLTV_F(...) __DOLTV_F_GET_OVERRIDE(__VA_ARGS__, DOLTV_F_2, DOLTV_F_1)(__VA_ARGS__);
+
 /// Display Object Life Time - Force
-#define DOLT_F(ptr) DOLTV_F(ptr, "")
+#define DOLT_F DOLTV_F("");
 
 #if DISPLAY_OBJECT_LIFE_TIME
-    /// Display Object Life Time Variable
-    #define DOLTV(ptr, argsStr) DOLTV_F(ptr, argsStr)
+    /// Display Object Life Time Variable - variant arguments
+    #define __DOLTV_GET_OVERRIDE(_1, _2, NAME, ...) NAME
+    #define DOLTV(...) __DOLTV_GET_OVERRIDE(__VA_ARGS__, DOLTV_F_2, DOLTV_F_1)(__VA_ARGS__);
 
     /// Display Object Life Time
-    #define DOLT(ptr) DOLTV(ptr, "")
+    #define DOLT DOLTV_F("");
 #else
-    /// Display Object Life Time Variable
-    #define DOLTV(ptr, argsStr)
+    /// Display Object Life Time Variable - variant arguments
+    #define DOLTV(...)
 
     /// Display Object Life Time
-    #define DOLT(ptr)
+    #define DOLT
 #endif
-
-
-
 
 #define I(...) Log::getInstance()->info    (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) /// info
 #define W(...) Log::getInstance()->warning (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) /// warning
