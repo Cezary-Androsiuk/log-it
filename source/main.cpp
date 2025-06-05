@@ -1,6 +1,6 @@
 #include <cstdio>
 
-#include "Log.h"
+#include "Log/Log.h"
 
 class C{
 public:
@@ -16,12 +16,12 @@ public:
     }
 
     void f1()
-    {T
+    {TR
 
     }
 
     void f2()
-    {T
+    {TR
         this->f2();
     }
 
@@ -30,29 +30,29 @@ public:
 };
 
 void f1(int a)
-{T
+{TR
 
 }
 
 void f2(int b)
-{T
+{TR
     f1(0);
 }
 
 void f3(int a, int b)
-{T
+{TR
 
 }
 
 void f4(int a, int b, int c)
-{T
+{TR
     f1(a);
     f2(b);
     f3(a,b);
 }
 
 void f5(int a, int b, int c, int d)
-{T
+{TR
     f1(a);
     f2(b);
     f3(a,b);
@@ -60,7 +60,7 @@ void f5(int a, int b, int c, int d)
 }
 
 int main()
-{T
+{TR
     C c;
     c.x = 1234;
 

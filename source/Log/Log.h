@@ -10,7 +10,8 @@
 // #include "LogSession.h"
 
 extern const char *version;
-extern const char *outputDirectory;
+extern const char *debugLogsOutputDirectory;
+extern const char *traceLogsOutputDirectory;
 
 #define ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME false /// decides if 'SingletonManager' class is a friend and could manage singleton life time by Log::instance
 #define EST_FUNCTION_LENGTH 70 /// estimated function name length what will be reserved while creating log
@@ -107,6 +108,12 @@ public:
     static constexpr Action actionForceHighest = Action::All; /// set highest ( will be compared with & sign )
     static constexpr Action actionForceLowest = Action::None;  /// set lowest ( will be compared with | sign )
 
+private:
+    Log();
+    ~Log();
+public:
+
+
     static Log *getInstance();
 
     void info(cstr func, cstr log, Action action = Action(Action::All));
@@ -124,14 +131,16 @@ public:
     // const LogSession &getCurrentSession() const;
 
 private:
-    std::string time(bool simpleSeparators = false);
-    std::string buildPrefix(Type logType, cstr funName);
-    std::string buildStartPrefix();
+    static void openFile(const char *directory, cstr fileName, std::ofstream &file);
+    static std::string time(bool simpleSeparators = false);
+    static std::string buildPrefix(Type logType, cstr funName);
+    static std::string buildStartPrefix();
 
     void log(Type logType, cstr funName, cstr log, Action action = Action::All);
     void safeLog(Type logType, cstr funName, cstr log, Action action = Action::All);
     void print(cstr content, bool newLine = true);
-    void saveFile(cstr content);
+    void saveDebugLogFile(cstr content);
+    void saveTraceLogFile(cstr content);
     void addSession(cstr content, bool newLine = true);
     // void addSession(Type logType, cstr funName, cstr message);
 
@@ -145,8 +154,11 @@ private:
     // LogSession m_currentSession;
     std::string m_currentSession;
 
-    std::string m_fileName;
-    std::ofstream m_outFile;
+    std::string m_startTime;
+
+    std::ofstream m_debugLogFile;
+    std::ofstream m_traceLogFile;
+
 #if ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME
     static Log* instance;
     friend class SingletonManager;

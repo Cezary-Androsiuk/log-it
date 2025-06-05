@@ -8,7 +8,8 @@
 #include <filesystem>
 
 const char *version = "v1.3.0";
-const char *outputDirectory = "logs/";
+const char *debugLogsOutputDirectory = "logs/debug/";
+const char *traceLogsOutputDirectory = "logs/trace/";
 
 #if ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME
 Log *Log::instance = nullptr;
@@ -47,6 +48,32 @@ const char *Log::logActionToStr(Action action)
     fflush(stderr);
 
     return "<unknown Log::Action>";
+}
+
+Log::Log()
+    : m_startTime{ this->time(true) }
+{
+    std::string logFilesName = m_startTime + ".log";
+    Log::openFile(debugLogsOutputDirectory, logFilesName, m_debugLogFile);
+    Log::openFile(traceLogsOutputDirectory, logFilesName, m_traceLogFile);
+}
+
+Log::~Log()
+{
+    m_debugLogFile.close();
+    m_traceLogFile.close();
+
+    /// at the end rename files from start to range
+    /// it allows to easy check time range in which application was open
+    /// end as benefit it allows to view if application crashed (if there is no end time)
+
+    std::string oldLogFilesName = m_startTime + ".log";
+
+    std::string endTime = this->time(true);
+    std::string newLogFilesName = m_startTime + "-" + endTime + ".log";
+
+    std::filesystem::rename(debugLogsOutputDirectory + oldLogFilesName, debugLogsOutputDirectory + newLogFilesName);
+    std::filesystem::rename(traceLogsOutputDirectory + oldLogFilesName, traceLogsOutputDirectory + newLogFilesName);
 }
 
 Log *Log::getInstance()
@@ -89,7 +116,7 @@ void Log::trace(std::string file, cstr func, int line)
     std::string time;
 
     try{
-        time = "[" + this->time() +  "]" + " ";
+        time = "[" + Log::time() +  "]" + " ";
     }
     catch (const std::exception &e) {
         fprintf(stderr, "creating time prefix failed, reason: %s\n", e.what());
@@ -116,7 +143,7 @@ void Log::trace(std::string file, cstr func, int line)
     /// 4. copy letters that left to function name string
 
     try{
-        this->saveFile(time + "T " + traceText);
+        this->saveTraceLogFile(time + "T " + traceText);
     }
     catch (const std::exception &e) {
         fprintf(stderr, "saving trace failed, reason: %s\n", e.what());
@@ -170,6 +197,31 @@ const std::string &Log::getCurrentSession() const
 // {
 //     return m_currentSession;
 // }
+
+void Log::openFile(const char *directory, cstr fileName, std::ofstream &file)
+{
+    if(!std::filesystem::exists(directory))
+    {
+        if(!std::filesystem::create_directories(directory))
+        {
+            fprintf(stderr, "cannot create '%s' output directory\n", directory);
+            fflush(stderr);
+            return;
+        }
+    }
+
+    std::string debugLogFilePath = directory + fileName;
+
+    file.open(debugLogFilePath, std::ios::app);
+    if(!file.is_open())
+    {
+        fprintf(stderr, "Error while creating log file!\n");
+        fflush(stderr);
+        return;
+    }
+
+    file << Log::buildStartPrefix() << "\n";
+}
 
 std::string Log::time(bool simpleSeparators)
 {
@@ -242,7 +294,7 @@ std::string Log::buildStartPrefix()
         std::string(EST_FUNCTION_LENGTH - sizeof(startText)/2 + 3 + 4, '-');
 
     std::string prefix;
-    prefix = /*"\n\n"*/ "[" + this->time() +  "]";
+    prefix = /*"\n\n"*/ "[" + Log::time() +  "]";
 
     return prefix + spaceText + startText + spaceText;
 }
@@ -255,7 +307,7 @@ void Log::log(Log::Type logType, cstr funName, cstr log, Log::Action action)
     std::string prefix;
 
     try{
-        time = "[" + this->time() +  "]" + " ";
+        time = "[" + Log::time() +  "]" + " ";
     }
     catch (const std::exception &e) {
         fprintf(stderr, "creating time prefix failed, reason: %s\n", e.what());
@@ -292,12 +344,12 @@ void Log::log(Log::Type logType, cstr funName, cstr log, Log::Action action)
         if(isRaw)
         {
             if(limitedAction & Action::Save)
-                this->saveFile(time + prefix + "\n""<<START RAW>>""\n" + log + "\n""<<END RAW>>");
+                this->saveDebugLogFile(time + prefix + "\n""<<START RAW>>""\n" + log + "\n""<<END RAW>>");
         }
         else
         {
             if(limitedAction & Action::Save)
-                this->saveFile(time + prefix + log);
+                this->saveDebugLogFile(time + prefix + log);
         }
     }
     catch (const std::exception &e) {
@@ -345,35 +397,22 @@ void Log::print(cstr content, bool newLine)
     fflush(stdout);
 }
 
-void Log::saveFile(cstr content)
+void Log::saveDebugLogFile(cstr content)
 {
-    if(!m_outFile.is_open())
-    {
-        if(!std::filesystem::exists(outputDirectory))
-        {
-            if(!std::filesystem::create_directory(outputDirectory))
-            {
-                fprintf(stderr, "cannot create '%s' output directory\n", outputDirectory);
-                fflush(stderr);
-                return;
-            }
-        }
+    if(!m_debugLogFile.is_open())
+        return;
 
-        m_fileName = outputDirectory + this->time(true) + ".log";
+    m_debugLogFile << content << "\n";
+    m_debugLogFile.flush(); /// required to save logs if application crashes
+}
 
-        m_outFile.open(m_fileName, std::ios::app);
-        if(!m_outFile.is_open())
-        {
-            fprintf(stderr, "Error while creating log file!\n");
-            fflush(stderr);
-            return;
-        }
+void Log::saveTraceLogFile(cstr content)
+{
+    if(!m_traceLogFile.is_open())
+        return;
 
-        m_outFile << this->buildStartPrefix() << "\n";
-    }
-
-    m_outFile << content << "\n";
-    m_outFile.flush(); /// required to save logs if application crashes
+    m_traceLogFile << content << "\n";
+    m_traceLogFile.flush(); /// required to save logs if application crashes
 }
 
 void Log::addSession(cstr content, bool newLine)
