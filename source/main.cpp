@@ -5,7 +5,7 @@
 class C{
 public:
     C()
-    {TR;
+    {TRM;
         DOLT;
         DOLTV("");
         DOLTV("", this);
@@ -14,7 +14,7 @@ public:
         DOLTV_F("", this);
     }
     C(int a, std::string b)
-    {TR;
+    {TRM;
         DOLT;
         DOLTV(SAPF("a(int): %d, b(std::string) %s", a, b.c_str()));
         DOLTV(SAPF("a(int): %d, b(std::string) %s", a, b.c_str()), this);
@@ -23,7 +23,7 @@ public:
         DOLTV_F(SAPF("a(int): %d, b(std::string) %s", a, b.c_str()), this);
     }
     ~C()
-    {TR;
+    {TRM;
         DOLT;
         DOLTV("");
         DOLTV("", this);
@@ -32,14 +32,14 @@ public:
         DOLTV_F("", this);
     }
 
-    void f1()
-    {TR
+    void mf1()
+    {TRM;
 
     }
 
-    void f2()
-    {TR
-        this->f2();
+    void mf2()
+    {TRM;
+        this->mf1();
     }
 
     int x;
@@ -47,29 +47,29 @@ public:
 };
 
 void f1(int a)
-{TR
+{TRF;
 
 }
 
 void f2(int b)
-{TR
+{TRF;
     f1(0);
 }
 
 void f3(int a, int b)
-{TR
+{TRF;
 
 }
 
 void f4(int a, int b, int c)
-{TR
+{TRF;
     f1(a);
     f2(b);
     f3(a,b);
 }
 
 void f5(int a, int b, int c, int d)
-{TR
+{TRF;
     f1(a);
     f2(b);
     f3(a,b);
@@ -77,9 +77,12 @@ void f5(int a, int b, int c, int d)
 }
 
 int main()
-{TR;
+{TRF;
+
     C c, c2(1,"2");
     c.x = 1234;
+    c.mf1();
+    c2.mf2();
 
     printf("qwea\n");
 

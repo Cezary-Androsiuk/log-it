@@ -12,6 +12,7 @@
 extern const char *version;
 extern const char *debugLogsOutputDirectory;
 extern const char *traceLogsOutputDirectory;
+extern const char *traceLogsInfoFileName;
 
 #define ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME false /// decides if 'SingletonManager' class is a friend and could manage singleton life time by Log::instance
 #define EST_FUNCTION_LENGTH 70 /// estimated function name length what will be reserved while creating log
@@ -78,9 +79,14 @@ extern const char *traceLogsOutputDirectory;
 #define RA(a, ...) Log::getInstance()->raw     (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); /// raw
 
 #if ENABLE_TRACE_LOGGING
-#define TR Log::getInstance()->trace        (__FILE__, /*__FUNCTION__,*/ __PRETTY_FUNCTION__, __LINE__); /// trace
+// TRace Method
+#define TRM Log::getInstance()->trace        (__FILE__, /*__FUNCTION__,*/ __PRETTY_FUNCTION__, __LINE__, this); /// trace method
+
+// TRace Function (or static method)
+#define TRF Log::getInstance()->trace        (__FILE__, /*__FUNCTION__,*/ __PRETTY_FUNCTION__, __LINE__, nullptr); /// trace function
 #else
-#define TR
+#define TRM
+#define TRF
 #endif
 
 
@@ -127,7 +133,7 @@ public:
     void debug(cstr func, cstr log, Action action = Action(Action::All));
     void raw(cstr func, cstr log, Action action = Action(Action::All));
 
-    void trace(std::string file, cstr func, int line);
+    void trace(std::string file, cstr func, int line, void *ptr);
 
     static std::string asprintf(const char *text, ...);
     static std::string asprintf(cstr text, ...);

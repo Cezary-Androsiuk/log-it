@@ -10,6 +10,7 @@
 const char *version = "v1.3.0";
 const char *debugLogsOutputDirectory = "logs/debug/";
 const char *traceLogsOutputDirectory = "logs/trace/";
+const char *traceLogsInfoFileName = "_program_start_time---program_end_time_.null";
 
 #if ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME
 Log *Log::instance = nullptr;
@@ -53,9 +54,15 @@ const char *Log::logActionToStr(Action action)
 Log::Log()
     : m_startTime{ this->time(true) }
 {
+
     std::string logFilesName = m_startTime + ".log";
     Log::openFile(debugLogsOutputDirectory, logFilesName, m_debugLogFile);
     Log::openFile(traceLogsOutputDirectory, logFilesName, m_traceLogFile);
+
+    /// create temporary file to inform about naming
+    std::ofstream tmpFile;
+    Log::openFile(traceLogsOutputDirectory, traceLogsInfoFileName, tmpFile);
+    tmpFile.close();
 }
 
 Log::~Log()
@@ -111,7 +118,7 @@ void Log::raw(cstr func, cstr log, Action action)
     this->safeLog(Type::Raw, func, log, action);
 }
 
-void Log::trace(std::string file, cstr func, int line)
+void Log::trace(std::string file, cstr func, int line, void *ptr)
 {
     std::string time;
 
@@ -133,8 +140,8 @@ void Log::trace(std::string file, cstr func, int line)
             file[i] = '#';
     }
 
-    std::string strLine = asprintf("%6d", line); /// assert that any file not contains more than 1 milion lines
-    std::string traceText = "" + file + "|" + strLine + "|" + func;
+    /// %6d - assert that any file not contains more than 1 milion lines - this allows to
+    std::string traceLine = asprintf("T %s|%6d|%p|%s", file.c_str(), line, ptr, func.c_str());
 
     /// to create algorithm reading trace path:
     /// 1. find "] T " pattern
@@ -143,7 +150,7 @@ void Log::trace(std::string file, cstr func, int line)
     /// 4. copy letters that left to function name string
 
     try{
-        this->saveTraceLogFile(time + "T " + traceText);
+        this->saveTraceLogFile(time + traceLine);
     }
     catch (const std::exception &e) {
         fprintf(stderr, "saving trace failed, reason: %s\n", e.what());
