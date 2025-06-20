@@ -186,6 +186,7 @@ public:
 
 private:
     static void openFile(const char *directory, cstr fileName, std::ofstream &file);
+    void logInfoAboutLogProperties();
     void logInfoAboutTraceProperties();
     static std::string time(bool simpleSeparators = false);
     static std::string buildPrefix(Type logType, cstr funName);

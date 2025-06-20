@@ -8,7 +8,7 @@
 #include <cstring>
 #include <filesystem>
 
-const char *version = "v1.8.0";
+const char *version = "v1.9.0";
 const char *debugLogsOutputDirectory = "logs/debug/";
 const char *traceLogsOutputDirectory = "logs/trace/";
 const char *traceLogsInfoFileName = "_program_start_time---program_end_time_.null";
@@ -61,6 +61,7 @@ Log::Log()
 
     std::string logFilesName = m_startTime + ".log";
     Log::openFile(debugLogsOutputDirectory, logFilesName, m_debugLogFile);
+    this->logInfoAboutLogProperties();
     Log::openFile(traceLogsOutputDirectory, logFilesName, m_traceLogFile);
     this->logInfoAboutTraceProperties();
 
@@ -175,18 +176,19 @@ void Log::trace(cstr file, cstr func, int line, void *ptr, cestr args)
         filePathIndex = m_filesPaths.size() +1;
         m_filesPaths[file] = filePathIndex;
 
+        newFilePathInfo = asprintf(("> " + fileFormat + "|%s\n").c_str(), filePathIndex, file.c_str())
 #if USE_QT_SUPPORT
-        newFilePathInfo = asprintf((fileFormat + "|%s\n").c_str(), filePathIndex, file.c_str()).toStdString();
-#else
-        newFilePathInfo = asprintf((fileFormat + "|%s\n").c_str(), filePathIndex, file.c_str());
+        .toStdString()
 #endif /// USE_QT_SUPPORT
+        ;
     }
 
 /// create trace line
+    std::string traceLine = asprintf(format.c_str(), filePathIndex, line, ptr, func.c_str(),
 #if USE_QT_SUPPORT
-    std::string traceLine = asprintf(format.c_str(), filePathIndex, line, ptr, func.c_str(), args.toStdString().c_str()).toStdString();
+   args.toStdString().c_str()).toStdString();
 #else
-    std::string traceLine = asprintf(format.c_str(), filePathIndex, line, ptr, func.c_str(), args.c_str());
+   args.c_str());
 #endif /// USE_QT_SUPPORT
 
     try{
@@ -280,15 +282,24 @@ void Log::openFile(const char *directory, cstr fileName, std::ofstream &file)
     file << Log::buildStartPrefix() << "\n";
 }
 
+void Log::logInfoAboutLogProperties()
+{
+    if(!m_debugLogFile.is_open())
+        return;
+
+    m_debugLogFile << "> " << version << " # version\n\n";
+}
+
 void Log::logInfoAboutTraceProperties()
 {
     if(!m_traceLogFile.is_open())
         return;
 
-    m_traceLogFile << MAX_LINE_INDEX_NUMBER_LENGTH_IN_TRACE_LOG
+    m_traceLogFile << "> " << version << " # version\n"
+                   << "> " << MAX_LINE_INDEX_NUMBER_LENGTH_IN_TRACE_LOG
                    << " # MAX_LINE_INDEX_NUMBER_LENGTH_IN_TRACE_LOG\n"
-                   << MAX_FILES_IN_PROJECT_COUNT_NUMBER_LENGTH
-                   << " # MAX_FILES_IN_PROJECT_COUNT_NUMBER_LENGTH\n";
+                   << "> " << MAX_FILES_IN_PROJECT_COUNT_NUMBER_LENGTH
+                   << " # MAX_FILES_IN_PROJECT_COUNT_NUMBER_LENGTH\n\n";
 }
 
 std::string Log::time(bool simpleSeparators)
