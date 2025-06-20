@@ -1,6 +1,7 @@
 #include <cstdio>
 
 #include "Log/Log.h"
+#include "SecondFileClass.h"
 
 class C{
 public:
@@ -76,6 +77,18 @@ void f5(int a, int b, int c, int d)
     f4(a,b,c);
 }
 
+
+std::string print_binary(size_t num)
+{TRF;
+    std::string str;
+    for (int i = (sizeof(num) * 8) - 1; i >= 0; i--) {
+        str += '0' + ((num >> i) & 1);
+        if (i % 8 == 0) str += ' ';
+    }
+    return str;
+}
+
+
 int main()
 {TRF;
 
@@ -93,9 +106,36 @@ int main()
     D(SAPF("%d", c.x));
     D("%d", c.x);
 
+    SecondFileClass sfc;
+    sfc.function();
+
     R("raw text1");
     R("\r""raw text2");
     R("\n");
 
     f5(1,2,3,4);
+
+
+    // printf("%llu\n", Log::computeMaxNumberFromNumberLength(4));
+    // printf("%llu\n", Log::increaseNumberToClosestTwoSquare(Log::computeMaxNumberFromNumberLength(4)));
+
+    // for(int i=0; i<30; i++)
+    // {
+    //     int _i = 1 << i;
+
+    //     printf("%s -> %s\n", print_binary(_i-1).c_str(),
+    //         print_binary(Log::increaseNumberToClosestTwoSquare(_i-1)).c_str()
+    //     );
+
+    //     printf("%s -> %s\n", print_binary(_i  ).c_str(),
+    //        print_binary(Log::increaseNumberToClosestTwoSquare(_i  )).c_str()
+    //     );
+
+    //     printf("%s -> %s\n", print_binary(_i+1).c_str(),
+    //        print_binary(Log::increaseNumberToClosestTwoSquare(_i+1)).c_str()
+    //     );
+
+    //     printf("\n");
+    //     fflush(stdout);
+    // }
 }

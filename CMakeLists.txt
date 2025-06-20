@@ -13,6 +13,7 @@ add_executable(
     source/main.cpp
 
     source/Log/Log.h source/Log/Log.cpp
+    source/SecondFileClass.h source/SecondFileClass.cpp
 
     # source/logQt/Log.cpp source/logQt/Log.h
     # source/trying_using_object/Log.h source/trying_using_object/Log.cpp

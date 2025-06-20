@@ -6,6 +6,7 @@
 #include <vector>
 #include <fstream>
 #include <cstdarg> // va_list
+#include <unordered_map>
 
 // #include "LogSession.h"
 
@@ -22,6 +23,8 @@ extern const char *traceLogsInfoFileName;
 #define SPACE_BETWEEN_CONTENT_SPACE_AND_CONTENT true /// creates spaces between space: "x ........ y" instead of "x........y"
 #define DISPLAY_OBJECT_LIFE_TIME true /// decides if Display Object Life Time (DOLT) is enabled
 #define ENABLE_TRACE_LOGGING true /// decides if trace logging is enabled and functions names will be saved to logs
+#define MAX_LINE_INDEX_NUMBER_LENGTH_IN_TRACE_LOG 7 /// to keep logs pretty - assert that max lines count in any file is 9'999'999
+#define MAX_FILES_IN_PROJECT_COUNT_NUMBER_LENGTH 4 /// to keep logs pretty - assert that max count of files in project is 9'999
 
 
 /// String As PrintF
@@ -133,7 +136,7 @@ public:
     void debug(cstr func, cstr log, Action action = Action(Action::All));
     void raw(cstr func, cstr log, Action action = Action(Action::All));
 
-    void trace(std::string file, cstr func, int line, void *ptr);
+    void trace(cstr file, cstr func, int line, void *ptr);
 
     static std::string asprintf(const char *text, ...);
     static std::string asprintf(cstr text, ...);
@@ -143,9 +146,13 @@ public:
 
 private:
     static void openFile(const char *directory, cstr fileName, std::ofstream &file);
+    void logInfoAboutTraceProperties();
     static std::string time(bool simpleSeparators = false);
     static std::string buildPrefix(Type logType, cstr funName);
     static std::string buildStartPrefix();
+
+    static size_t computeMaxNumberFromNumberLength(int length);
+    // static size_t increaseNumberToClosestTwoSquare(size_t number);
 
     void log(Type logType, cstr funName, cstr log, Action action = Action::All);
     void safeLog(Type logType, cstr funName, cstr log, Action action = Action::All);
@@ -169,6 +176,8 @@ private:
 
     std::ofstream m_debugLogFile;
     std::ofstream m_traceLogFile;
+
+    std::unordered_map<std::string, int> m_filesPaths;
 
 #if ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME
     static Log* instance;

@@ -4,10 +4,11 @@
 #include <iomanip>
 #include <sstream>
 #include <memory>
+#include <cmath>
 #include <cstring>
 #include <filesystem>
 
-const char *version = "v1.5.0";
+const char *version = "v1.6.0";
 const char *debugLogsOutputDirectory = "logs/debug/";
 const char *traceLogsOutputDirectory = "logs/trace/";
 const char *traceLogsInfoFileName = "_program_start_time---program_end_time_.null";
@@ -54,10 +55,14 @@ const char *Log::logActionToStr(Action action)
 Log::Log()
     : m_startTime{ this->time(true) }
 {
+    constexpr int fileLen = MAX_FILES_IN_PROJECT_COUNT_NUMBER_LENGTH;
+    const int filesCount = Log::computeMaxNumberFromNumberLength(fileLen);
+    m_filesPaths.reserve(filesCount);
 
     std::string logFilesName = m_startTime + ".log";
     Log::openFile(debugLogsOutputDirectory, logFilesName, m_debugLogFile);
     Log::openFile(traceLogsOutputDirectory, logFilesName, m_traceLogFile);
+    this->logInfoAboutTraceProperties();
 
     /// create temporary file to inform about naming
     std::ofstream tmpFile;
@@ -118,7 +123,7 @@ void Log::raw(cstr func, cstr log, Action action)
     this->safeLog(Type::Raw, func, log, action);
 }
 
-void Log::trace(std::string file, cstr func, int line, void *ptr)
+void Log::trace(cstr file, cstr func, int line, void *ptr)
 {
     std::string time;
 
@@ -130,27 +135,33 @@ void Log::trace(std::string file, cstr func, int line, void *ptr)
         fflush(stderr);
     }
 
+    /// create displayed format
+    static constexpr int lineLen = MAX_LINE_INDEX_NUMBER_LENGTH_IN_TRACE_LOG;
+    static constexpr int fileLen = MAX_FILES_IN_PROJECT_COUNT_NUMBER_LENGTH;
+    const std::string lineFormat = "%" + std::to_string(lineLen) + "d";
+    const std::string fileFormat = "%" + std::to_string(fileLen) + "d";
+    std::string format = "T " +fileFormat+ "|" +lineFormat+ "|%p|%s";
 
-    /// assert path for the project (while compilation) not contains '|' sign
-    /// or in worst case at least not contains pattern like "| 0123 |" - start and end with '|', and numers with space inside
-    /// but better change any occurance to #, because path is not that required
-    for(int i=0; i<file.size(); i++)
+    /// compute index from file name - save space in trace file
+    int filePathIndex = 0;
+    std::string newFilePathInfo;
+    auto fIt = m_filesPaths.find(file);
+    if(fIt != m_filesPaths.end())
     {
-        if(file[i] == '|')
-            file[i] = '#';
+        filePathIndex = fIt->second;
+    }
+    else
+    {
+        filePathIndex = m_filesPaths.size() +1;
+        m_filesPaths[file] = filePathIndex;
+        newFilePathInfo = asprintf((fileFormat + "|%s\n").c_str(), filePathIndex, file.c_str());
     }
 
-    /// %6d - assert that any file not contains more than 1 milion lines - this allows to
-    std::string traceLine = asprintf("T %s|%6d|%p|%s", file.c_str(), line, ptr, func.c_str());
-
-    /// to create algorithm reading trace path:
-    /// 1. find "] T " pattern
-    /// 2. copy letters to path string until '|' occur
-    /// 3. copy letters to line string until '|' occur again (string shoud be trimmed from all space characters)
-    /// 4. copy letters that left to function name string
+    /// create trace line
+    std::string traceLine = asprintf(format.c_str(), filePathIndex, line, ptr, func.c_str());
 
     try{
-        this->saveTraceLogFile(time + traceLine);
+        this->saveTraceLogFile(newFilePathInfo + time + traceLine);
     }
     catch (const std::exception &e) {
         fprintf(stderr, "saving trace failed, reason: %s\n", e.what());
@@ -230,6 +241,17 @@ void Log::openFile(const char *directory, cstr fileName, std::ofstream &file)
     file << Log::buildStartPrefix() << "\n";
 }
 
+void Log::logInfoAboutTraceProperties()
+{
+    if(!m_traceLogFile.is_open())
+        return;
+
+    m_traceLogFile << MAX_LINE_INDEX_NUMBER_LENGTH_IN_TRACE_LOG
+                   << " # MAX_LINE_INDEX_NUMBER_LENGTH_IN_TRACE_LOG\n"
+                   << MAX_FILES_IN_PROJECT_COUNT_NUMBER_LENGTH
+                   << " # MAX_FILES_IN_PROJECT_COUNT_NUMBER_LENGTH\n";
+}
+
 std::string Log::time(bool simpleSeparators)
 {
     auto now = std::chrono::system_clock::now();
@@ -305,6 +327,45 @@ std::string Log::buildStartPrefix()
 
     return prefix + spaceText + startText + spaceText;
 }
+
+size_t Log::computeMaxNumberFromNumberLength(int length)
+{
+    return static_cast<size_t>( std::pow(10, length) ) -1;
+}
+
+// size_t Log::increaseNumberToClosestTwoSquare(size_t number)
+// {
+//     if(!number || number == 1) return 1;
+//     -- number; /// handle case where number is already the power of 2
+
+//     static constexpr size_t st_max = static_cast<size_t>(-1);
+//     size_t returnNumber = ~(st_max >> 1);
+
+//     if(returnNumber & number) /// handle case where number is above largest power of 2 that can be storred
+//     {
+//         fprintf(stderr, "\n\n" "Can't process %llu number in %s" "\n\n\n", number, __PRETTY_FUNCTION__);
+//         fflush(stderr);
+//         return number;
+//     }
+//     // number >>= 1;
+
+//     // while(returnNumber>0)
+//     // {
+//     //     if(returnNumber & number)
+//     //         return number << 1;
+//     // }
+
+//     number |= number >> 1;
+//     number |= number >> 2;
+//     number |= number >> 4;
+//     number |= number >> 8;
+//     number |= number >> 16;
+//     if constexpr (sizeof(size_t) > 4) {
+//         number |= number >> 32;
+//     }
+
+//     return number + 1;
+// }
 
 void Log::log(Log::Type logType, cstr funName, cstr log, Log::Action action)
 {
