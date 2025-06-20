@@ -83,13 +83,21 @@ extern const char *traceLogsInfoFileName;
 
 #if ENABLE_TRACE_LOGGING
 // TRace Method
-#define TRM Log::getInstance()->trace        (__FILE__, /*__FUNCTION__,*/ __PRETTY_FUNCTION__, __LINE__, this); /// trace method
+#define TRM Log::getInstance()->trace           (__FILE__, /*__FUNCTION__,*/ __PRETTY_FUNCTION__, __LINE__, this, ""); /// trace method
+
+// TRace Method Variables
+#define TRMV(...) Log::getInstance()->trace     (__FILE__, /*__FUNCTION__,*/ __PRETTY_FUNCTION__, __LINE__, this, SAPF(__VA_ARGS__)); /// trace method variables
 
 // TRace Function (or static method)
-#define TRF Log::getInstance()->trace        (__FILE__, /*__FUNCTION__,*/ __PRETTY_FUNCTION__, __LINE__, nullptr); /// trace function
+#define TRF Log::getInstance()->trace           (__FILE__, /*__FUNCTION__,*/ __PRETTY_FUNCTION__, __LINE__, nullptr, ""); /// trace function
+
+// TRace Function Variables (or static method)
+#define TRFV(...) Log::getInstance()->trace     (__FILE__, /*__FUNCTION__,*/ __PRETTY_FUNCTION__, __LINE__, nullptr, SAPF(__VA_ARGS__)); /// trace function variables
 #else
 #define TRM
+#define TRMV(...)
 #define TRF
+#define TRFV(...)
 #endif
 
 
@@ -136,7 +144,7 @@ public:
     void debug(cstr func, cstr log, Action action = Action(Action::All));
     void raw(cstr func, cstr log, Action action = Action(Action::All));
 
-    void trace(cstr file, cstr func, int line, void *ptr);
+    void trace(cstr file, cstr func, int line, void *ptr, cstr args);
 
     static std::string asprintf(const char *text, ...);
     static std::string asprintf(cstr text, ...);

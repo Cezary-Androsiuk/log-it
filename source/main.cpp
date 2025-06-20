@@ -48,29 +48,29 @@ public:
 };
 
 void f1(int a)
-{TRF;
+{TRFV("%d", a);
 
 }
 
 void f2(int b)
-{TRF;
+{TRFV("%d", b);
     f1(0);
 }
 
 void f3(int a, int b)
-{TRF;
+{TRFV("%d, %d", a, b);
 
 }
 
 void f4(int a, int b, int c)
-{TRF;
+{TRFV("%d, %d, %d", a, b, c);
     f1(a);
     f2(b);
     f3(a,b);
 }
 
 void f5(int a, int b, int c, int d)
-{TRF;
+{TRFV("%d, %d, %d", a, b, c);
     f1(a);
     f2(b);
     f3(a,b);
@@ -79,7 +79,7 @@ void f5(int a, int b, int c, int d)
 
 
 std::string print_binary(size_t num)
-{TRF;
+{TRFV("%llu", num);
     std::string str;
     for (int i = (sizeof(num) * 8) - 1; i >= 0; i--) {
         str += '0' + ((num >> i) & 1);
@@ -119,23 +119,23 @@ int main()
     // printf("%llu\n", Log::computeMaxNumberFromNumberLength(4));
     // printf("%llu\n", Log::increaseNumberToClosestTwoSquare(Log::computeMaxNumberFromNumberLength(4)));
 
-    // for(int i=0; i<30; i++)
-    // {
-    //     int _i = 1 << i;
+    for(int i=0; i<6; i++)
+    {
+        int _i = 1 << i;
 
-    //     printf("%s -> %s\n", print_binary(_i-1).c_str(),
-    //         print_binary(Log::increaseNumberToClosestTwoSquare(_i-1)).c_str()
-    //     );
+        printf("%s -> %s\n", print_binary(_i-1).c_str(),
+            print_binary(_i-1).c_str()
+        );
 
-    //     printf("%s -> %s\n", print_binary(_i  ).c_str(),
-    //        print_binary(Log::increaseNumberToClosestTwoSquare(_i  )).c_str()
-    //     );
+        printf("%s -> %s\n", print_binary(_i  ).c_str(),
+           print_binary(_i  ).c_str()
+        );
 
-    //     printf("%s -> %s\n", print_binary(_i+1).c_str(),
-    //        print_binary(Log::increaseNumberToClosestTwoSquare(_i+1)).c_str()
-    //     );
+        printf("%s -> %s\n", print_binary(_i+1).c_str(),
+           print_binary(_i+1).c_str()
+        );
 
-    //     printf("\n");
-    //     fflush(stdout);
-    // }
+        printf("\n");
+        fflush(stdout);
+    }
 }

@@ -8,7 +8,7 @@
 #include <cstring>
 #include <filesystem>
 
-const char *version = "v1.6.0";
+const char *version = "v1.7.0";
 const char *debugLogsOutputDirectory = "logs/debug/";
 const char *traceLogsOutputDirectory = "logs/trace/";
 const char *traceLogsInfoFileName = "_program_start_time---program_end_time_.null";
@@ -123,7 +123,7 @@ void Log::raw(cstr func, cstr log, Action action)
     this->safeLog(Type::Raw, func, log, action);
 }
 
-void Log::trace(cstr file, cstr func, int line, void *ptr)
+void Log::trace(cstr file, cstr func, int line, void *ptr, cstr args)
 {
     std::string time;
 
@@ -140,7 +140,7 @@ void Log::trace(cstr file, cstr func, int line, void *ptr)
     static constexpr int fileLen = MAX_FILES_IN_PROJECT_COUNT_NUMBER_LENGTH;
     const std::string lineFormat = "%" + std::to_string(lineLen) + "d";
     const std::string fileFormat = "%" + std::to_string(fileLen) + "d";
-    std::string format = "T " +fileFormat+ "|" +lineFormat+ "|%p|%s";
+    std::string format = "T " +fileFormat+ "|" +lineFormat+ "|%p|%s|[%s]";
 
     /// compute index from file name - save space in trace file
     int filePathIndex = 0;
@@ -158,7 +158,7 @@ void Log::trace(cstr file, cstr func, int line, void *ptr)
     }
 
     /// create trace line
-    std::string traceLine = asprintf(format.c_str(), filePathIndex, line, ptr, func.c_str());
+    std::string traceLine = asprintf(format.c_str(), filePathIndex, line, ptr, func.c_str(), args.c_str());
 
     try{
         this->saveTraceLogFile(newFilePathInfo + time + traceLine);
