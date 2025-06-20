@@ -8,7 +8,7 @@
 #include <cstring>
 #include <filesystem>
 
-const char *version = "v1.9.0";
+const char *version = "v1.9.1";
 const char *debugLogsOutputDirectory = "logs/debug/";
 const char *traceLogsOutputDirectory = "logs/trace/";
 const char *traceLogsInfoFileName = "_program_start_time---program_end_time_.null";

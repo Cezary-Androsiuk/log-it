@@ -1,6 +1,63 @@
 #ifndef LOG_H
 #define LOG_H
 
+/*
+
+SAPF(...)       - String As PrintF - creates string from a printf like formatting
+
+I(...)          - Info - info log - log starts with "I"
+W(...)          - Warning - log starts with "W ###"
+E(...)          - Error - log starts with "E ### ###"
+D(...)          - Debug - log starts with "D"
+R(...)          - Raw - log starts with "R" - no formating in terminal output but more space in logs
+
+IA(a, ...)      - InfoAction - as Info log but action can be scpecified (only print or only sesion and save etc.)
+WA(a, ...)      - WarningAction - as Warning log but action can be scpecified (only print or only sesion and save etc.)
+EA(a, ...)      - ErrorAction - as Error log but action can be scpecified (only print or only sesion and save etc.)
+DA(a, ...)      - DebugAction - as Debug log but action can be scpecified (only print or only sesion and save etc.)
+RA(a, ...)      - RawAction - as Raw log but action can be scpecified (only print or only sesion and save etc.)
+
+TRM             - TRace Method - placed at start of any class method allows to track later how program behaves
+TRF             - TRace Function - placed at start of any function or a static method allows to track later how program behaves
+TRMV(...)       - TRace Method Variables - just like TRM but allows to pass arguments (SAPF format) that are given to that method
+TRFV(...)       - TRace Function Variables - just like TRF but allows to pass arguments (SAPF format) that are given to that function
+
+DOLT            - Display Object Life Time - placed in constructor and destructor allows to log informations (with pointer to it) about that object life time
+DOLT_F          - Display Object Life Time - Force - just like DOLT, but can't be disabled by DISPLAY_OBJECT_LIFE_TIME
+DOLTV(...)      - Display Object Life Time with Variables - just like a DOLT but allows to pass values of an constructor arguments
+DOLTV_F(...)    - Display Object Life Time with Variables - Force - just like a DOLT_F and DOLTV(...)
+
+
+==================================
+Examples:
+
+SAPF(...)       - SAPF("%d", 1); or SAPF("%d %s", 1, "abc"); or SAPF("%d %s %s", 1, "abc", stringVar.c_str());
+
+I(...)          - I("%d = %s", 1, "abc");
+W(...)          - W("%d = %s", 1, "abc");
+E(...)          - E("%d = %s", 1, "abc");
+D(...)          - D("%d = %s", 1, "abc");
+R(...)          - R("%d = %s", 1, "abc");
+
+IA(a, ...)      - IA(Log::Action::None, "%d = %s", 1, "abc");
+WA(a, ...)      - WA(Log::Action::Save, "%d = %s", 1, "abc");
+EA(a, ...)      - EA(Log::Action::Print, "%d = %s", 1, "abc");
+DA(a, ...)      - DA(Log::Action::PrintSession, "%d = %s", 1, "abc");
+RA(a, ...)      - RA(Log::Action::All, "%d = %s", 1, "abc");
+
+TRM             - void function(){TRM; //////; }
+TRF             - void function(){TRF; //////; }
+TRMV(...)       - void function(int a, char *b){TRMV("%d, %s", a, b); //////; }
+TRFV(...)       - void function(int a, char *b){TRFV("%d, %s", a, b); //////; }
+
+DOLT            - MyClass(){DOLT; //////; }
+DOLT_F          - MyClass(){DOLT_F; //////; }
+DOLTV(...)      - MyClass(int c, int b, int a){DOLTV("1, 2, 3") or DOLTV("1, 2, 3", this); //////; }
+DOLTV_F(...)    - MyClass(int c, int b, int a){DOLTV_F("1, 2, 3") or DOLTV_F("1, 2, 3", this); //////; }
+
+*/
+
+
 #define USE_QT_SUPPORT false /// in external layer of abstraction QString will be used insead of std::string
 /// it allows to use I(someQStringVariable); instead of  I(someQStringVariable.toStdString());
 
@@ -66,8 +123,8 @@ typedef cstr cestr; /// const extern string
 #define ESTR_IS_EMPTY(s) s.empty()
 #endif /// USE_QT_SUPPORT
 
-/// Display Object Life Time Variable - Force - 2 arguments
-#define DOLTV_F_2(argsStr, ptr) {                                           \
+/// Display Object Life Time Variable - Force - 2 arguments (constructor arguments values and pointer to object)
+#define __DOLTV_F_2(argsStr, ptr) {                                           \
 estr f_name(__FUNCTION__);                                              \
     if(ESTR_IS_EMPTY(f_name))      f_name = "unknown action";               \
     if(f_name[0] == '~')    f_name = "Destroying " + f_name;                \
@@ -77,12 +134,12 @@ estr f_name(__FUNCTION__);                                              \
     DA(Log::Action::SaveSession, f_name + argsEStr + SAPF(": %p", ptr));    \
 }
 
-/// Display Object Life Time Variable - Force - 1 argument
-#define DOLTV_F_1(argsStr)        DOLTV_F_2(argsStr, this);
+/// Display Object Life Time Variable - Force - 1 argument (constructor arguments values)
+#define __DOLTV_F_1(argsStr)        __DOLTV_F_2(argsStr, this);
 
 /// Display Object Life Time Variable - Force - variant arguments
 #define __DOLTV_F_GET_OVERRIDE(_1, _2, NAME, ...) NAME
-#define DOLTV_F(...) __DOLTV_F_GET_OVERRIDE(__VA_ARGS__, DOLTV_F_2, DOLTV_F_1)(__VA_ARGS__);
+#define DOLTV_F(...) __DOLTV_F_GET_OVERRIDE(__VA_ARGS__, __DOLTV_F_2, __DOLTV_F_1)(__VA_ARGS__);
 
 /// Display Object Life Time - Force
 #define DOLT_F DOLTV_F("");
@@ -90,7 +147,7 @@ estr f_name(__FUNCTION__);                                              \
 #if DISPLAY_OBJECT_LIFE_TIME
 /// Display Object Life Time Variable - variant arguments
 #define __DOLTV_GET_OVERRIDE(_1, _2, NAME, ...) NAME
-#define DOLTV(...) __DOLTV_GET_OVERRIDE(__VA_ARGS__, DOLTV_F_2, DOLTV_F_1)(__VA_ARGS__);
+#define DOLTV(...) __DOLTV_GET_OVERRIDE(__VA_ARGS__, __DOLTV_F_2, __DOLTV_F_1)(__VA_ARGS__);
 
 /// Display Object Life Time
 #define DOLT DOLTV_F("");
@@ -114,7 +171,8 @@ estr f_name(__FUNCTION__);                                              \
 #define DA(a, ...) Log::getInstance()->debug   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); /// debug
 #define RA(a, ...) Log::getInstance()->raw     (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); /// raw
 
-#define TR
+// #define TR
+
 #if ENABLE_TRACE_LOGGING
 // TRace Method
 #define TRM Log::getInstance()->trace           (__FILE__, /*__FUNCTION__,*/ __PRETTY_FUNCTION__, __LINE__, this, ""); /// trace method
