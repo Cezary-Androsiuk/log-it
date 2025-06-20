@@ -1,19 +1,8 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include <cstdio>
-#include <string>
-#include <vector>
-#include <fstream>
-#include <cstdarg> // va_list
-#include <unordered_map>
-
-// #include "LogSession.h"
-
-extern const char *version;
-extern const char *debugLogsOutputDirectory;
-extern const char *traceLogsOutputDirectory;
-extern const char *traceLogsInfoFileName;
+#define USE_QT_SUPPORT false /// in external layer of abstraction QString will be used insead of std::string
+/// it allows to use I(someQStringVariable); instead of  I(someQStringVariable.toStdString());
 
 #define ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME false /// decides if 'SingletonManager' class is a friend and could manage singleton life time by Log::instance
 #define EST_FUNCTION_LENGTH 70 /// estimated function name length what will be reserved while creating log
@@ -26,6 +15,43 @@ extern const char *traceLogsInfoFileName;
 #define MAX_LINE_INDEX_NUMBER_LENGTH_IN_TRACE_LOG 7 /// to keep logs pretty - assert that max lines count in any file is 9'999'999
 #define MAX_FILES_IN_PROJECT_COUNT_NUMBER_LENGTH 4 /// to keep logs pretty - assert that max count of files in project is 9'999
 
+#include <cstdio>
+
+#include <string>
+#include <vector>
+
+#if USE_QT_SUPPORT
+#include <QString>
+#include <QList>
+#include <QUrl>
+#endif /// USE_QT_SUPPORT
+
+#include <fstream>
+#include <cstdarg> // va_list
+#include <unordered_map>
+
+// #include "LogSession.h"
+
+extern const char *version;
+extern const char *debugLogsOutputDirectory;
+extern const char *traceLogsOutputDirectory;
+extern const char *traceLogsInfoFileName;
+
+typedef std::string str; /// string
+typedef const str &cstr; /// const string
+
+#if USE_QT_SUPPORT
+typedef QString qstr; /// q string
+typedef const qstr &cqstr; /// const q string
+#endif /// USE_QT_SUPPORT
+
+#if USE_QT_SUPPORT
+typedef qstr estr; /// extern string
+typedef cqstr cestr; /// const extern string
+#else
+typedef str estr; /// extern string
+typedef cstr cestr; /// const extern string
+#endif /// USE_QT_SUPPORT
 
 /// String As PrintF
 #define SAPF(...) Log::asprintf(__VA_ARGS__)
@@ -33,15 +59,22 @@ extern const char *traceLogsInfoFileName;
 /// DOLT wtih 'Force' allows to disable all other DOLT and focus on only one class
 /// DOLT Variable (DOLTV) allows to pass arguments that are used in constructor/destructor
 
+
+#if USE_QT_SUPPORT
+#define ESTR_IS_EMPTY(s) s.isEmpty()
+#else
+#define ESTR_IS_EMPTY(s) s.empty()
+#endif /// USE_QT_SUPPORT
+
 /// Display Object Life Time Variable - Force - 2 arguments
 #define DOLTV_F_2(argsStr, ptr) {                                           \
-    std::string f_name(__FUNCTION__);                                       \
-    if(f_name.empty())      f_name = "unknown action";                      \
+estr f_name(__FUNCTION__);                                              \
+    if(ESTR_IS_EMPTY(f_name))      f_name = "unknown action";               \
     if(f_name[0] == '~')    f_name = "Destroying " + f_name;                \
     else                    f_name = "Creating " + f_name;                  \
-    std::string qargsStr(argsStr);                                          \
-    if(!qargsStr.empty()) qargsStr = "(" + qargsStr + ")";                  \
-    DA(Log::Action::SaveSession, f_name + qargsStr + SAPF(": %p", ptr));    \
+    estr argsEStr(argsStr);                                                 \
+    if(!ESTR_IS_EMPTY(argsEStr)) argsEStr = "(" + argsEStr + ")";            \
+    DA(Log::Action::SaveSession, f_name + argsEStr + SAPF(": %p", ptr));    \
 }
 
 /// Display Object Life Time Variable - Force - 1 argument
@@ -55,18 +88,18 @@ extern const char *traceLogsInfoFileName;
 #define DOLT_F DOLTV_F("");
 
 #if DISPLAY_OBJECT_LIFE_TIME
-    /// Display Object Life Time Variable - variant arguments
-    #define __DOLTV_GET_OVERRIDE(_1, _2, NAME, ...) NAME
-    #define DOLTV(...) __DOLTV_GET_OVERRIDE(__VA_ARGS__, DOLTV_F_2, DOLTV_F_1)(__VA_ARGS__);
+/// Display Object Life Time Variable - variant arguments
+#define __DOLTV_GET_OVERRIDE(_1, _2, NAME, ...) NAME
+#define DOLTV(...) __DOLTV_GET_OVERRIDE(__VA_ARGS__, DOLTV_F_2, DOLTV_F_1)(__VA_ARGS__);
 
-    /// Display Object Life Time
-    #define DOLT DOLTV_F("");
+/// Display Object Life Time
+#define DOLT DOLTV_F("");
 #else
-    /// Display Object Life Time Variable - variant arguments
-    #define DOLTV(...)
+/// Display Object Life Time Variable - variant arguments
+#define DOLTV(...)
 
-    /// Display Object Life Time
-    #define DOLT
+/// Display Object Life Time
+#define DOLT
 #endif
 
 #define I(...) Log::getInstance()->info    (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__)) /// info
@@ -81,6 +114,7 @@ extern const char *traceLogsInfoFileName;
 #define DA(a, ...) Log::getInstance()->debug   (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); /// debug
 #define RA(a, ...) Log::getInstance()->raw     (__PRETTY_FUNCTION__, SAPF(__VA_ARGS__), Log::Action(a)); /// raw
 
+#define TR
 #if ENABLE_TRACE_LOGGING
 // TRace Method
 #define TRM Log::getInstance()->trace           (__FILE__, /*__FUNCTION__,*/ __PRETTY_FUNCTION__, __LINE__, this, ""); /// trace method
@@ -125,8 +159,6 @@ public:
     };
     static const char *logActionToStr(Action action);
 
-    typedef const std::string &cstr;
-
     static constexpr Action actionForceHighest = Action::All; /// set highest ( will be compared with & sign )
     static constexpr Action actionForceLowest = Action::None;  /// set lowest ( will be compared with | sign )
 
@@ -138,18 +170,18 @@ public:
 
     static Log *getInstance();
 
-    void info(cstr func, cstr log, Action action = Action(Action::All));
-    void warning(cstr func, cstr log, Action action = Action(Action::All));
-    void error(cstr func, cstr log, Action action = Action(Action::All));
-    void debug(cstr func, cstr log, Action action = Action(Action::All));
-    void raw(cstr func, cstr log, Action action = Action(Action::All));
+    void info(cstr func, cestr log, Action action = Action(Action::All));
+    void warning(cstr func, cestr log, Action action = Action(Action::All));
+    void error(cstr func, cestr log, Action action = Action(Action::All));
+    void debug(cstr func, cestr log, Action action = Action(Action::All));
+    void raw(cstr func, cestr log, Action action = Action(Action::All));
 
-    void trace(cstr file, cstr func, int line, void *ptr, cstr args);
+    void trace(cstr file, cstr func, int line, void *ptr, cestr args);
 
-    static std::string asprintf(const char *text, ...);
-    static std::string asprintf(cstr text, ...);
+    static estr asprintf(const char *text, ...);
+    static estr asprintf(cestr text, ...);
 
-    const std::string &getCurrentSession() const;
+    cstr getCurrentSession() const;
     // const LogSession &getCurrentSession() const;
 
 private:
@@ -173,7 +205,12 @@ private:
 public:
     class Convert{
     public:
+#if USE_QT_SUPPORT
+        static QString listUrlToString(QList<QUrl> list);
+        static QString listStrToString(QList<QString> list);
+#else
         static std::string vectorToString(std::vector<std::string> list);
+#endif /// USE_QT_SUPPORT
     };
 
 private:

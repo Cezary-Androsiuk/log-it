@@ -8,7 +8,7 @@
 #include <cstring>
 #include <filesystem>
 
-const char *version = "v1.7.0";
+const char *version = "v1.8.0";
 const char *debugLogsOutputDirectory = "logs/debug/";
 const char *traceLogsOutputDirectory = "logs/trace/";
 const char *traceLogsInfoFileName = "_program_start_time---program_end_time_.null";
@@ -98,32 +98,52 @@ Log *Log::getInstance()
 #endif
 }
 
-void Log::info(cstr func, cstr log, Log::Action action)
+void Log::info(cstr func, cestr log, Log::Action action)
 {
+#if USE_QT_SUPPORT
+    this->safeLog(Type::Info, func, log.toStdString(), action);
+#else
     this->safeLog(Type::Info, func, log, action);
+#endif /// USE_QT_SUPPORT
 }
 
-void Log::warning(cstr func, cstr log, Log::Action action)
+void Log::warning(cstr func, cestr log, Log::Action action)
 {
+#if USE_QT_SUPPORT
+    this->safeLog(Type::Warning, func, log.toStdString(), action);
+#else
     this->safeLog(Type::Warning, func, log, action);
+#endif /// USE_QT_SUPPORT
 }
 
-void Log::error(cstr func, cstr log, Log::Action action)
+void Log::error(cstr func, cestr log, Log::Action action)
 {
+#if USE_QT_SUPPORT
+    this->safeLog(Type::Error, func, log.toStdString(), action);
+#else
     this->safeLog(Type::Error, func, log, action);
+#endif /// USE_QT_SUPPORT
 }
 
-void Log::debug(cstr func, cstr log, Log::Action action)
+void Log::debug(cstr func, cestr log, Log::Action action)
 {
+#if USE_QT_SUPPORT
+    this->safeLog(Type::Debug, func, log.toStdString(), action);
+#else
     this->safeLog(Type::Debug, func, log, action);
+#endif /// USE_QT_SUPPORT
 }
 
-void Log::raw(cstr func, cstr log, Action action)
+void Log::raw(cstr func, cestr log, Action action)
 {
+#if USE_QT_SUPPORT
+    this->safeLog(Type::Raw, func, log.toStdString(), action);
+#else
     this->safeLog(Type::Raw, func, log, action);
+#endif /// USE_QT_SUPPORT
 }
 
-void Log::trace(cstr file, cstr func, int line, void *ptr, cstr args)
+void Log::trace(cstr file, cstr func, int line, void *ptr, cestr args)
 {
     std::string time;
 
@@ -154,11 +174,20 @@ void Log::trace(cstr file, cstr func, int line, void *ptr, cstr args)
     {
         filePathIndex = m_filesPaths.size() +1;
         m_filesPaths[file] = filePathIndex;
+
+#if USE_QT_SUPPORT
+        newFilePathInfo = asprintf((fileFormat + "|%s\n").c_str(), filePathIndex, file.c_str()).toStdString();
+#else
         newFilePathInfo = asprintf((fileFormat + "|%s\n").c_str(), filePathIndex, file.c_str());
+#endif /// USE_QT_SUPPORT
     }
 
-    /// create trace line
+/// create trace line
+#if USE_QT_SUPPORT
+    std::string traceLine = asprintf(format.c_str(), filePathIndex, line, ptr, func.c_str(), args.toStdString().c_str()).toStdString();
+#else
     std::string traceLine = asprintf(format.c_str(), filePathIndex, line, ptr, func.c_str(), args.c_str());
+#endif /// USE_QT_SUPPORT
 
     try{
         this->saveTraceLogFile(newFilePathInfo + time + traceLine);
@@ -169,7 +198,7 @@ void Log::trace(cstr file, cstr func, int line, void *ptr, cstr args)
     }
 }
 
-std::string Log::asprintf(const char *text, ...)
+estr Log::asprintf(const char *text, ...)
 {
     va_list args;
     va_start(args, text);
@@ -189,17 +218,27 @@ std::string Log::asprintf(const char *text, ...)
     vsnprintf(buffer.get(), size+1, text, args);
     va_end(args);
 
+#if USE_QT_SUPPORT
+    return std::string(buffer.get(), size).c_str();
+#else
     return std::string(buffer.get(), size);
+#endif /// USE_QT_SUPPORT
 }
 
-std::string Log::asprintf(cstr text, ...)
+estr Log::asprintf(cestr text, ...)
 {
-    va_list args;
-    #pragma clang diagnostic ignored "-Wvarargs" /// qtcreator uses clang
-    #pragma GCC diagnostic ignored "-Wvarargs" /// compiler uses gcc
-    va_start(args, text.c_str());
+#if USE_QT_SUPPORT
+    const str _text = text.toStdString();
+#else
+    const str &_text = text;
+#endif /// USE_QT_SUPPORT
 
-    std::string str = Log::asprintf(text.c_str(), args);
+    va_list args;
+#pragma clang diagnostic ignored "-Wvarargs" /// qtcreator uses clang
+#pragma GCC diagnostic ignored "-Wvarargs" /// compiler uses gcc
+    va_start(args, _text.c_str());
+
+    const estr str = Log::asprintf(_text.c_str(), args);
 
     va_end(args);
 
@@ -493,6 +532,23 @@ void Log::addSession(cstr content, bool newLine)
 //     m_currentSession.addPart(logType, funName, message);
 // }
 
+#if USE_QT_SUPPORT
+QString Log::Convert::listUrlToString(QList<QUrl> list)
+{
+    QString str("[");
+    for(const auto &i : list)
+        str += "\"" + i.toLocalFile() + "\", ";
+    return str + "\b\b]";
+}
+
+QString Log::Convert::listStrToString(QList<QString> list)
+{
+    QString str("[");
+    for(const auto &i : list)
+        str += "\"" + i + "\", ";
+    return str + "\b\b]";
+}
+#else
 std::string Log::Convert::vectorToString(std::vector<std::string> list)
 {
     std::string str("[");
@@ -500,3 +556,4 @@ std::string Log::Convert::vectorToString(std::vector<std::string> list)
         str += "\"" + i + "\", ";
     return str + "\b\b]";
 }
+#endif /// USE_QT_SUPPORT
