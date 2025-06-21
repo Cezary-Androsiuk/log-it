@@ -43,6 +43,11 @@ public:
         this->mf1();
     }
 
+    int constReturnMethod() const
+    {TRM;
+        return this->x;
+    }
+
     int x;
 
 };
@@ -97,7 +102,8 @@ int main()
     c.mf1();
     c2.mf2();
 
-    printf("qwea\n");
+    printf("qwea %d\n", c.constReturnMethod());
+    I("qwea %d", c.constReturnMethod());
 
     I("12345");
     auto s = SAPF("1234");

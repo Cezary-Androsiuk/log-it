@@ -8,7 +8,7 @@
 #include <cstring>
 #include <filesystem>
 
-const char *version = "v1.9.1";
+const char *version = "v1.9.2";
 const char *debugLogsOutputDirectory = "logs/debug/";
 const char *traceLogsOutputDirectory = "logs/trace/";
 const char *traceLogsInfoFileName = "_program_start_time---program_end_time_.null";
@@ -144,7 +144,7 @@ void Log::raw(cstr func, cestr log, Action action)
 #endif /// USE_QT_SUPPORT
 }
 
-void Log::trace(cstr file, cstr func, int line, void *ptr, cestr args)
+void Log::trace(cstr file, cstr func, int line, const void *ptr, cestr args)
 {
     std::string time;
 

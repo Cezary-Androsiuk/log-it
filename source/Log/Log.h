@@ -234,7 +234,7 @@ public:
     void debug(cstr func, cestr log, Action action = Action(Action::All));
     void raw(cstr func, cestr log, Action action = Action(Action::All));
 
-    void trace(cstr file, cstr func, int line, void *ptr, cestr args);
+    void trace(cstr file, cstr func, int line, const void *ptr, cestr args);
 
     static estr asprintf(const char *text, ...);
     static estr asprintf(cestr text, ...);
