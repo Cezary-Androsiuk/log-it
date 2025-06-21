@@ -52,6 +52,22 @@ public:
 
 };
 
+class C2
+{
+public:
+    C2(const std::vector<C *> &vec)
+    {TRM; DOLTV(
+            [&](){
+                std::string t = "[";
+                for(C *c : vec) t += SAPF("%p, ", c);
+                if(!vec.empty()) t.resize(t.size() - 2);
+                return t + "]";
+            }().c_str()
+        )
+
+    }
+};
+
 void f1(int a)
 {TRFV("%d", a);
 
@@ -97,10 +113,10 @@ std::string print_binary(size_t num)
 int main()
 {TRF;
 
-    C c, c2(1,"2");
+    C c, cc(1,"2");
     c.x = 1234;
     c.mf1();
-    c2.mf2();
+    cc.mf2();
 
     printf("qwea %d\n", c.constReturnMethod());
     I("qwea %d", c.constReturnMethod());
@@ -121,6 +137,11 @@ int main()
 
     f5(1,2,3,4);
 
+    std::vector<C*> vecC;
+    while(vecC.size() < 3)
+        vecC.push_back(new C());
+
+    C2 c2(vecC);
 
     // printf("%llu\n", Log::computeMaxNumberFromNumberLength(4));
     // printf("%llu\n", Log::increaseNumberToClosestTwoSquare(Log::computeMaxNumberFromNumberLength(4)));
@@ -144,4 +165,7 @@ int main()
         printf("\n");
         fflush(stdout);
     }
+
+    for(C *c_ptr : vecC)
+        delete c_ptr;
 }
