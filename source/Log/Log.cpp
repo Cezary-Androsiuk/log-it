@@ -8,9 +8,13 @@
 #include <cstring>
 #include <filesystem>
 
-const char *version = "v1.9.2";
+const char *version = "v1.10.1";
+#if SPLIT_DEBUG_AND_TRACE_LOGS
 const char *debugLogsOutputDirectory = "logs/debug/";
 const char *traceLogsOutputDirectory = "logs/trace/";
+#else
+const char *logsOutputDirectory = "logs/";
+#endif /// SPLIT_DEBUG_AND_TRACE_LOGS
 const char *logsInfoFileName = "_program_start_time-program_end_time_";
 
 #if ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME
@@ -60,23 +64,37 @@ Log::Log()
     m_filesPaths.reserve(filesCount);
 
     std::string logFilesName = m_startTime + ".log";
+#if SPLIT_DEBUG_AND_TRACE_LOGS
     Log::openFile(debugLogsOutputDirectory, logFilesName, m_debugLogFile);
     this->logInfoAboutLogProperties();
     Log::openFile(traceLogsOutputDirectory, logFilesName, m_traceLogFile);
     this->logInfoAboutTraceProperties();
+#else
+    Log::openFile(logsOutputDirectory, logFilesName, m_logFile);
+    this->logInfoAboutLogProperties();
+#endif /// SPLIT_DEBUG_AND_TRACE_LOGS
 
     /// create temporary file to inform about naming
     std::ofstream tmpFile;
+#if SPLIT_DEBUG_AND_TRACE_LOGS
     Log::openFile(debugLogsOutputDirectory, logsInfoFileName, tmpFile);
     tmpFile.close();
     Log::openFile(traceLogsOutputDirectory, logsInfoFileName, tmpFile);
     tmpFile.close();
+#else
+    Log::openFile(logsOutputDirectory, logsInfoFileName, tmpFile);
+    tmpFile.close();
+#endif /// SPLIT_DEBUG_AND_TRACE_LOGS
 }
 
 Log::~Log()
 {
+#if SPLIT_DEBUG_AND_TRACE_LOGS
     m_debugLogFile.close();
     m_traceLogFile.close();
+#else
+    m_logFile.close();
+#endif /// SPLIT_DEBUG_AND_TRACE_LOGS
 
     /// at the end rename files from start to range
     /// it allows to easy check time range in which application was open
@@ -86,9 +104,12 @@ Log::~Log()
 
     std::string endTime = this->time(true);
     std::string newLogFilesName = m_startTime + "-" + endTime + ".log";
-
+#if SPLIT_DEBUG_AND_TRACE_LOGS
     std::filesystem::rename(debugLogsOutputDirectory + oldLogFilesName, debugLogsOutputDirectory + newLogFilesName);
     std::filesystem::rename(traceLogsOutputDirectory + oldLogFilesName, traceLogsOutputDirectory + newLogFilesName);
+#else
+    std::filesystem::rename(logsOutputDirectory + oldLogFilesName, logsOutputDirectory + newLogFilesName);
+#endif /// SPLIT_DEBUG_AND_TRACE_LOGS
 }
 
 Log *Log::getInstance()
@@ -286,14 +307,26 @@ void Log::openFile(const char *directory, cstr fileName, std::ofstream &file)
 
 void Log::logInfoAboutLogProperties()
 {
+#if SPLIT_DEBUG_AND_TRACE_LOGS
     if(!m_debugLogFile.is_open())
         return;
 
     m_debugLogFile << "> " << version << " # version\n\n";
+#else
+    if(!m_logFile.is_open())
+        return;
+
+    m_logFile << "> " << version << " # version\n"
+              << "> " << MAX_LINE_INDEX_NUMBER_LENGTH_IN_TRACE_LOG
+              << " # MAX_LINE_INDEX_NUMBER_LENGTH_IN_TRACE_LOG\n"
+              << "> " << MAX_FILES_IN_PROJECT_COUNT_NUMBER_LENGTH
+              << " # MAX_FILES_IN_PROJECT_COUNT_NUMBER_LENGTH\n\n";
+#endif /// SPLIT_DEBUG_AND_TRACE_LOGS
 }
 
 void Log::logInfoAboutTraceProperties()
 {
+#if SPLIT_DEBUG_AND_TRACE_LOGS
     if(!m_traceLogFile.is_open())
         return;
 
@@ -302,6 +335,7 @@ void Log::logInfoAboutTraceProperties()
                    << " # MAX_LINE_INDEX_NUMBER_LENGTH_IN_TRACE_LOG\n"
                    << "> " << MAX_FILES_IN_PROJECT_COUNT_NUMBER_LENGTH
                    << " # MAX_FILES_IN_PROJECT_COUNT_NUMBER_LENGTH\n\n";
+#endif /// SPLIT_DEBUG_AND_TRACE_LOGS
 }
 
 std::string Log::time(bool simpleSeparators)
@@ -519,20 +553,32 @@ void Log::print(cstr content, bool newLine)
 
 void Log::saveDebugLogFile(cstr content)
 {
-    if(!m_debugLogFile.is_open())
+#if SPLIT_DEBUG_AND_TRACE_LOGS
+    std::ofstream &file = m_debugLogFile;
+#else
+    std::ofstream &file = m_logFile;
+#endif /// SPLIT_DEBUG_AND_TRACE_LOGS
+
+    if(!file.is_open())
         return;
 
-    m_debugLogFile << content << "\n";
-    m_debugLogFile.flush(); /// required to save logs if application crashes
+    file << content << "\n";
+    file.flush(); /// required to save logs if application crashes
 }
 
 void Log::saveTraceLogFile(cstr content)
 {
-    if(!m_traceLogFile.is_open())
+#if SPLIT_DEBUG_AND_TRACE_LOGS
+    std::ofstream &file = m_traceLogFile;
+#else
+    std::ofstream &file = m_logFile;
+#endif /// SPLIT_DEBUG_AND_TRACE_LOGS
+
+    if(!file.is_open())
         return;
 
-    m_traceLogFile << content << "\n";
-    m_traceLogFile.flush(); /// required to save logs if application crashes
+    file << content << "\n";
+    file.flush(); /// required to save logs if application crashes
 }
 
 void Log::addSession(cstr content, bool newLine)
