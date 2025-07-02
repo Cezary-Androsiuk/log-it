@@ -11,7 +11,7 @@
 const char *version = "v1.9.2";
 const char *debugLogsOutputDirectory = "logs/debug/";
 const char *traceLogsOutputDirectory = "logs/trace/";
-const char *traceLogsInfoFileName = "_program_start_time---program_end_time_.null";
+const char *logsInfoFileName = "_program_start_time-program_end_time_";
 
 #if ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME
 Log *Log::instance = nullptr;
@@ -67,7 +67,9 @@ Log::Log()
 
     /// create temporary file to inform about naming
     std::ofstream tmpFile;
-    Log::openFile(traceLogsOutputDirectory, traceLogsInfoFileName, tmpFile);
+    Log::openFile(debugLogsOutputDirectory, logsInfoFileName, tmpFile);
+    tmpFile.close();
+    Log::openFile(traceLogsOutputDirectory, logsInfoFileName, tmpFile);
     tmpFile.close();
 }
 
