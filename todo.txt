@@ -1,3 +1,19 @@
 1: W i E stdout -> stderr
 
 2: jeżeli wykonuje się kompilacja release nie wyświetlaj funkcji w komunikatach
+
+3: dodać oznaczenie akcji w Trace oraz w Logs - żeby można było użyć tego do oznaczenia akcji użytkownika (albo RAW TRACE) na przykład coś takiego:
+...
+[2025-06-21 17:30:37.495] T    8|     49|0000000000000000|Event* Backend::getEventPtrQml() const|[]
+[2025-06-21 17:30:37.511] T    5|    103|000002a3a655bce0|void NetworkManager::deleteReply()|[]
+
+========================================================== ACTION ==========================================================
+INFO: [2025-06-21 17:32:56.426] ...
+
+[2025-06-21 17:32:56.426] T    8|     49|0000000000000000|Event* Backend::getEventPtrQml() const|[]
+[2025-06-21 17:32:56.426] T    7|    435|000002a3a655dd10|void Event::assignExampleData()|[]
+...
+
+4: dodać pliki LogQML
+
+5: dodać lepsze session 
