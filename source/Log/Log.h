@@ -61,6 +61,7 @@ DOLTV_F(...)    - MyClass(int c, int b, int a){DOLTV_F("1, 2, 3") or DOLTV_F("1,
 #define USE_QT_SUPPORT false /// in external layer of abstraction QString will be used insead of std::string
 /// it allows to use I(someQStringVariable); instead of  I(someQStringVariable.toStdString());
 
+#define SPLIT_DEBUG_AND_TRACE_LOGS true /// if true, then debug and trace logs will be saved in different files
 #define ENABLE_MANAGING_LOG_INSTANCE_LIFE_TIME false /// decides if 'SingletonManager' class is a friend and could manage singleton life time by Log::instance
 #define EST_FUNCTION_LENGTH 70 /// estimated function name length what will be reserved while creating log
 #define SHORTER_FUNCTION_FILL_CHARACTER ' ' /// characters that fills area before function name to fit estimated function name length
@@ -90,6 +91,7 @@ DOLTV_F(...)    - MyClass(int c, int b, int a){DOLTV_F("1, 2, 3") or DOLTV_F("1,
 // #include "LogSession.h"
 
 extern const char *version;
+#if SPLIT_DEBUG_AND_TRACE_LOGS
 extern const char *debugLogsOutputDirectory;
 extern const char *traceLogsOutputDirectory;
 extern const char *traceLogsInfoFileName;
